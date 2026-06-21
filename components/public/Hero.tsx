@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Phone, Zap, Droplet, Wrench, Waves, Hammer, Home, CheckCircle } from 'lucide-react';
+import { Phone, Zap, Droplet, Wrench, Waves, Hammer, Home } from 'lucide-react';
 
 const WA_ICON = (
   <svg className="w-6 h-6 fill-current flex-shrink-0" viewBox="0 0 24 24" aria-hidden="true">
@@ -12,30 +12,31 @@ const WA_ICON = (
 );
 
 const serviceChips = [
-  { icon: Zap, label: 'Electrical', color: '#FFF8E1', iconColor: '#F57C00' },
-  { icon: Droplet, label: 'Plumbing', color: '#E3F2FD', iconColor: '#1565C0' },
-  { icon: Wrench, label: 'Appliances', color: '#F3E5F5', iconColor: '#7B1FA2' },
-  { icon: Waves, label: 'Water Tank', color: '#E0F7FA', iconColor: '#00838F' },
-  { icon: Hammer, label: 'Handywork', color: '#FBE9E7', iconColor: '#BF360C' },
-  { icon: Home, label: 'Maintenance', color: '#E8F5E9', iconColor: '#2E7D32' },
+  { icon: Zap,    label: 'Electrical', bg: '#FFF3E0', color: '#E65100' },
+  { icon: Droplet,label: 'Plumbing',   bg: '#E3F2FD', color: '#0D47A1' },
+  { icon: Wrench, label: 'Appliances', bg: '#F3E5F5', color: '#6A1B9A' },
+  { icon: Waves,  label: 'Water Tank', bg: '#E0F7FA', color: '#006064' },
+  { icon: Hammer, label: 'Handywork',  bg: '#FBE9E7', color: '#BF360C' },
+  { icon: Home,   label: 'Maintenance',bg: '#E8F5E9', color: '#1B5E20' },
 ];
 
 const trustBadges = [
   { emoji: '⚡', text: 'Same-Day Service' },
   { emoji: '✅', text: 'Verified Experts' },
   { emoji: '📞', text: '24/7 Support' },
-  { emoji: '💯', text: 'Satisfaction Guaranteed' },
+  { emoji: '🛡️', text: '90-Day Guarantee' },
 ];
 
 const stats = [
-  { value: '2000+', label: 'Happy Families', color: '#1565C0' },
-  { value: '5K+', label: 'Jobs Done', color: '#F57C00' },
-  { value: '4.8★', label: 'Customer Rating', color: '#2E7D32' },
+  { value: '2000+', label: 'Happy Families' },
+  { value: '5K+',   label: 'Jobs Done' },
+  { value: '4.8★',  label: 'Rating' },
 ];
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden" style={{ background: '#0D47A1' }}>
+    <section className="relative overflow-hidden min-h-[92vh] flex items-center">
+
       {/* ── Background photo ── */}
       <div className="absolute inset-0">
         <Image
@@ -44,188 +45,148 @@ export function Hero() {
           fill
           className="object-cover object-center"
           priority
-          quality={85}
+          quality={90}
           sizes="100vw"
         />
-        {/* Multi-layer gradient overlay for readability */}
+        {/* 
+          Light mode: light-left dark-right gradient so the photo shows on right
+          Dark mode: deeper overlay
+        */}
         <div
           className="absolute inset-0"
           style={{
-            background:
-              'linear-gradient(160deg, rgba(13,71,161,0.90) 0%, rgba(21,101,192,0.82) 40%, rgba(25,118,210,0.78) 70%, rgba(30,58,95,0.92) 100%)',
+            background: [
+              /* left column — readable text area */
+              'linear-gradient(100deg,',
+              '  rgba(13,34,64,0.88) 0%,',
+              '  rgba(26,58,92,0.75) 38%,',
+              '  rgba(26,58,92,0.45) 60%,',
+              '  rgba(13,34,64,0.25) 100%)',
+            ].join(''),
           }}
         />
-        {/* Bottom fade to match page bg */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, rgba(13,71,161,0.5))' }} />
+        {/* subtle warm tint to pull out the terracotta tones */}
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(200,75,17,0.06) 0%, transparent 60%)' }} />
       </div>
 
-      {/* Decorative blobs on top of photo */}
-      <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-15 pointer-events-none" style={{ background: 'radial-gradient(circle, #F57C00 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
-      <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-10 pointer-events-none" style={{ background: 'radial-gradient(circle, #42A5F5 0%, transparent 70%)', transform: 'translate(-30%, 30%)' }} />
-      <div className="absolute inset-0 hero-pattern pointer-events-none" />
+      {/* Decorative light blooms */}
+      <div className="absolute top-0 left-0 w-72 h-72 rounded-full pointer-events-none opacity-20"
+        style={{ background: 'radial-gradient(circle, #C88A10 0%, transparent 70%)', transform: 'translate(-30%,-30%)' }} />
+      <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full pointer-events-none opacity-10"
+        style={{ background: 'radial-gradient(circle, #C84B11 0%, transparent 70%)', transform: 'translate(30%,30%)' }} />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-24">
-        <div className="flex flex-col items-center text-center gap-8">
+      {/* ── Content ── */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-28">
+        <div className="max-w-2xl flex flex-col gap-7">
 
-          {/* Top badge */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold"
-              style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'rgba(255,255,255,0.95)' }}>
-              📍 Trusted in Udupi, Shankarpura & Nearby Areas
+          {/* Top pill */}
+          <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white"
+              style={{ background: 'rgba(200,75,17,0.65)', border: '1px solid rgba(255,255,255,0.3)', backdropFilter: 'blur(8px)' }}>
+              📍 Udupi's Most Trusted Home Service
             </span>
           </motion.div>
 
-          {/* Main Headline */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
+          {/* Headline */}
+          <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className="space-y-3"
-          >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-tight">
-              Home Repairs Made{' '}
-              <span className="relative inline-block">
-                <span style={{
-                  background: 'linear-gradient(135deg, #FFD54F, #FFB300)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>
-                  Easy & Fast
-                </span>
-                <motion.div
-                  className="absolute -bottom-1 left-0 right-0 h-1 rounded-full"
-                  style={{ background: 'linear-gradient(90deg, #FFD54F, #FFB300)' }}
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ duration: 0.6, delay: 0.8 }}
-                />
+            className="text-4xl sm:text-5xl md:text-6xl font-black text-white leading-tight drop-shadow-lg">
+            Home Repairs Made{' '}
+            <span className="relative inline-block">
+              <span style={{ background: 'linear-gradient(135deg,#F5A623,#E8702A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                Easy & Fast
               </span>
-            </h1>
-            <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed font-medium">
-              Electricians, Plumbers & Technicians at your door — same day. Just tap below to book or WhatsApp us.
-            </p>
-          </motion.div>
+              <motion.div className="absolute -bottom-1 left-0 right-0 h-1 rounded-full"
+                style={{ background: 'linear-gradient(90deg,#F5A623,#E8702A)' }}
+                initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.6, delay: 0.9 }} />
+            </span>
+          </motion.h1>
 
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+          {/* Subtitle */}
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-lg sm:text-xl text-white/90 leading-relaxed font-medium drop-shadow max-w-xl">
+            Electricians, Plumbers &amp; Technicians at your door — same day. Trusted by 2000+ families across Udupi district.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex flex-col sm:flex-row gap-4 w-full max-w-md mx-auto"
-          >
-            <Link
-              href="/file-complaint"
-              className="btn-primary flex-1 text-lg justify-center"
-              style={{ background: 'linear-gradient(135deg, #F57C00, #FF9800)', boxShadow: '0 6px 24px rgba(245,124,0,0.45)' }}
-            >
+            className="flex flex-col sm:flex-row gap-4">
+            <Link href="/file-complaint" className="btn-terra flex-1 text-lg justify-center">
               📋 Book a Service
             </Link>
-            <a
-              href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20need%20help%20with%20a%20service."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-whatsapp flex-1 text-lg justify-center"
-            >
-              {WA_ICON}
-              WhatsApp Now
+            <a href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20need%20help."
+              target="_blank" rel="noopener noreferrer"
+              className="btn-whatsapp flex-1 text-lg justify-center">
+              {WA_ICON} WhatsApp Now
             </a>
           </motion.div>
 
-          {/* Service Quick-Picks */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="w-full max-w-2xl"
-          >
-            <p className="text-blue-200 text-sm font-semibold mb-4 uppercase tracking-widest">What do you need?</p>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+          {/* Service quick-picks */}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}>
+            <p className="text-white/70 text-xs font-bold uppercase tracking-widest mb-3">What do you need?</p>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
               {serviceChips.map((chip, i) => (
-                <motion.div
-                  key={chip.label}
-                  initial={{ opacity: 0, scale: 0.8 }}
+                <motion.div key={chip.label}
+                  initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 + i * 0.07 }}
                   whileHover={{ scale: 1.08, y: -3 }}
-                  whileTap={{ scale: 0.94 }}
-                >
-                  <Link
-                    href="/file-complaint"
-                    className="flex flex-col items-center gap-2 px-3 py-3.5 rounded-2xl cursor-pointer transition-all"
-                    style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}
-                  >
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: chip.color }}>
-                      <chip.icon className="w-5 h-5" style={{ color: chip.iconColor }} strokeWidth={2.5} />
+                  whileTap={{ scale: 0.94 }}>
+                  <Link href="/file-complaint"
+                    className="flex flex-col items-center gap-2 px-2 py-3 rounded-2xl cursor-pointer transition-all"
+                    style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(6px)' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{ background: chip.bg }}>
+                      <chip.icon className="w-5 h-5" style={{ color: chip.color }} strokeWidth={2.5} />
                     </div>
-                    <span className="text-white text-xs font-semibold text-center leading-tight">{chip.label}</span>
+                    <span className="text-white text-[11px] font-bold text-center leading-tight">{chip.label}</span>
                   </Link>
                 </motion.div>
               ))}
             </div>
           </motion.div>
 
-          {/* Trust Badges */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="flex flex-wrap justify-center gap-3"
-          >
-            {trustBadges.map((badge) => (
-              <span
-                key={badge.text}
+          {/* Trust badges */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+            className="flex flex-wrap gap-2">
+            {trustBadges.map(b => (
+              <span key={b.text}
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold text-white"
-                style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)' }}
-              >
-                <span>{badge.emoji}</span>
-                {badge.text}
+                style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(6px)' }}>
+                {b.emoji} {b.text}
               </span>
             ))}
           </motion.div>
 
-          {/* Stats Row */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-            className="grid grid-cols-3 gap-4 w-full max-w-xl pt-2"
-          >
-            {stats.map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                whileHover={{ scale: 1.05 }}
-                className="text-center p-4 rounded-2xl"
-                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)' }}
-              >
-                <p className="text-3xl font-black text-white">{stat.value}</p>
-                <p className="text-blue-200 text-xs font-semibold mt-1 leading-tight">{stat.label}</p>
-              </motion.div>
+          {/* Stats */}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
+            className="flex gap-5 pt-1">
+            {stats.map(s => (
+              <div key={s.label} className="text-center px-4 py-3 rounded-2xl"
+                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }}>
+                <p className="text-2xl font-black text-white">{s.value}</p>
+                <p className="text-white/70 text-xs font-semibold mt-0.5 leading-tight">{s.label}</p>
+              </div>
             ))}
           </motion.div>
 
           {/* Phone CTA */}
-          <motion.a
-            href="tel:+917337843016"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9 }}
-            className="flex items-center gap-2 text-blue-200 hover:text-white transition-colors font-medium text-sm group"
-          >
+          <motion.a href="tel:+917337843016" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
+            className="flex items-center gap-2 text-white/70 hover:text-white transition-colors font-medium text-sm group w-fit">
             <Phone className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            Emergency? Call directly: <span className="font-bold text-white">+91 73378 43016</span>
+            Emergency? Call: <span className="font-black text-white">+91 73378 43016</span>
           </motion.a>
         </div>
       </div>
 
       {/* Bottom wave */}
-      <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-none">
-        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" className="w-full h-12">
-          <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#F8FAFF" />
+      <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-none pointer-events-none">
+        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none" className="w-full h-12">
+          <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="var(--background)" />
         </svg>
       </div>
     </section>
