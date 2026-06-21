@@ -73,8 +73,14 @@ export function MeetTheTeam() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.15, duration: 0.6 }}
-              className="relative rounded-3xl overflow-hidden bg-background border-2 group"
-              style={{ borderColor: `${member.color}20`, boxShadow: `0 4px 32px ${member.color}10` }}
+              className="relative rounded-3xl overflow-hidden bg-background border-2 group interactive-glow-card"
+              style={{
+                borderColor: `${member.color}20`,
+                boxShadow: `0 4px 32px ${member.color}10`,
+                '--glow-card-color': member.color,
+                '--glow-card-shadow': `${member.color}40`,
+                '--glow-card-shadow-subtle': `${member.color}20`,
+              } as React.CSSProperties}
             >
               {/* Top colour bar */}
               <div className="h-1.5 w-full" style={{ background: member.gradient }} />

@@ -38,7 +38,12 @@ export function Services() {
               initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ delay: i * 0.1 }}
               whileHover={{ y: -6, transition: { duration: 0.2 } }}
-              className="service-card group relative overflow-hidden">
+              className="service-card group relative overflow-hidden"
+              style={{
+                '--svc-color': svc.color,
+                '--svc-glow': `${svc.color}40`,
+                '--svc-glow-subtle': `${svc.color}20`
+              } as React.CSSProperties}>
               <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl" style={{ background: svc.gradient }} />
               <div className="flex items-start gap-4 mb-5">
                 <motion.div whileHover={{ rotate: [0,-10,10,0] }} transition={{ duration: 0.4 }}

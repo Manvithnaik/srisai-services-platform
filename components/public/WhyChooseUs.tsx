@@ -33,8 +33,14 @@ export function WhyChooseUs() {
               initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ delay: i * 0.09 }}
               whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className="flex items-start gap-4 p-6 rounded-3xl transition-all cursor-default bg-card border-2"
-              style={{ borderColor: `${b.color}15`, boxShadow: '0 2px 12px rgba(0,0,0,0.05)' }}>
+              className="flex items-start gap-4 p-6 rounded-3xl transition-all cursor-default bg-card border-2 interactive-glow-card"
+              style={{
+                borderColor: `${b.color}15`,
+                boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                '--glow-card-color': b.color,
+                '--glow-card-shadow': `${b.color}40`,
+                '--glow-card-shadow-subtle': `${b.color}20`,
+              } as React.CSSProperties}>
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
                 style={{ background: b.bg }}>
                 {b.emoji}

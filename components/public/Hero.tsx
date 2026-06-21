@@ -136,8 +136,14 @@ export function Hero() {
                   whileHover={{ scale: 1.08, y: -3 }}
                   whileTap={{ scale: 0.94 }}>
                   <Link href="/file-complaint"
-                    className="flex flex-col items-center gap-2 px-2 py-3 rounded-2xl cursor-pointer transition-all"
-                    style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(6px)' }}>
+                    className="flex flex-col items-center gap-2 px-2 py-3 rounded-2xl cursor-pointer hero-service-chip"
+                    style={{
+                      background: 'rgba(255,255,255,0.12)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backdropFilter: 'blur(6px)',
+                      '--chip-color': chip.color,
+                      '--chip-glow-color': `${chip.color}60`
+                    } as React.CSSProperties}>
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center"
                       style={{ background: chip.bg }}>
                       <chip.icon className="w-5 h-5" style={{ color: chip.color }} strokeWidth={2.5} />

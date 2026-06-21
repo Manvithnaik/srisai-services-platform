@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import { Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
+import { CursorGlow } from '@/components/ui/CursorGlow'
 
 const inter = Inter({
   variable: '--font-inter',
@@ -47,6 +48,7 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-background text-foreground">
         <Providers>
           {children}
+          <CursorGlow />
         </Providers>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
