@@ -231,9 +231,25 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-/* legacy aliases */
-.gradient-text-blue   { @apply gradient-text-primary; }
-.gradient-text-orange { @apply gradient-text-terra; }
+/* legacy aliases — duplicate properties (no @apply custom classes in TW v4) */
+.gradient-text-blue {
+  background: linear-gradient(135deg, #1A3A5C, #2A5080);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.dark .gradient-text-blue {
+  background: linear-gradient(135deg, #E8A040, #C88A10);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-text-orange {
+  background: linear-gradient(135deg, #C84B11, #E05A1A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
 /* ═══════════════════════════════════════════════════
    SECTION BADGE
