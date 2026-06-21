@@ -1,30 +1,34 @@
-'use client';
-
-import Navbar from '@/components/Navbar';
-import BookingForm from '@/components/BookingForm';
-import Hero from '@/components/Hero';
-import Services from '@/components/Services';
-import { HowItWorks } from '@/components/HowItWorks';
-import Gallery from '@/components/Gallery';
-import Testimonials from '@/components/Testimonials';
-import { AreasWeServe } from '@/components/AreasWeServe';
-import Footer from '@/components/Footer';
+import { Header } from '@/components/common/Header';
+import { Footer } from '@/components/common/Footer';
 import { MobileStickyBar } from '@/components/MobileStickyBar';
+import { Hero } from '@/components/public/Hero';
+import { Services } from '@/components/public/Services';
+import { WhyChooseUs } from '@/components/public/WhyChooseUs';
+import { RecentWork } from '@/components/RecentWork';
+import { HowItWorks } from '@/components/HowItWorks';
+import { AreasWeServe } from '@/components/AreasWeServe';
+import Testimonials from '@/components/Testimonials';
+
+export const metadata = {
+  title: 'Shree Devi Services — Electrical & Plumbing in Udupi, Shankarpura',
+  description: 'Trusted home maintenance experts in Shankarpura, Udupi. Electricians, plumbers, AC service & appliance repair. Same-day service, 24/7 emergency support. Book online!',
+};
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white pb-16 md:pb-0">
-      <Navbar />
-      {/* ★ Booking form is the FIRST thing users see ★ */}
-      <BookingForm />
-      <Hero />
-      <Services />
-      <HowItWorks />
-      <Gallery />
-      <Testimonials />
-      <AreasWeServe />
+    <div className="flex flex-col min-h-screen pb-16 md:pb-0">
+      <Header />
+      <main className="flex-1">
+        <Hero />
+        <Services />
+        <HowItWorks />
+        <RecentWork />
+        <WhyChooseUs />
+        <Testimonials />
+        <AreasWeServe />
+      </main>
       <Footer />
       <MobileStickyBar />
-    </main>
+    </div>
   );
 }
