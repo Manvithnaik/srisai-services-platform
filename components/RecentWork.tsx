@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Images } from 'lucide-react';
 
-// All 40 work images from /public/work-images/
 const workImages = [
   '/work-images/IMG-20260612-WA0114.jpg',
   '/work-images/IMG-20260612-WA0115.jpg',
@@ -50,185 +51,158 @@ const workImages = [
 
 export function RecentWork() {
   const [current, setCurrent] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const touchStartX = useRef<number>(0);
-  const touchEndX = useRef<number>(0);
+  const [loaded, setLoaded] = useState<Set<number>>(new Set([0]));
+  const touchStart = useRef<number>(0);
   const total = workImages.length;
 
-  const goTo = useCallback((index: number) => {
-    if (isAnimating) return;
-    setIsAnimating(true);
-    setCurrent((index + total) % total);
-    setTimeout(() => setIsAnimating(false), 500);
-  }, [isAnimating, total]);
+  const goTo = useCallback((idx: number) => {
+    const next = (idx + total) % total;
+    setCurrent(next);
+    setLoaded(prev => new Set([...prev, next, (next + 1) % total]));
+  }, [total]);
 
   const next = useCallback(() => goTo(current + 1), [current, goTo]);
   const prev = useCallback(() => goTo(current - 1), [current, goTo]);
 
-  // Auto-play every 3.5 seconds
   useEffect(() => {
     if (isPaused) return;
-    const timer = setInterval(() => {
-      setCurrent((c) => (c + 1) % total);
-    }, 3500);
-    return () => clearInterval(timer);
-  }, [isPaused, total]);
+    const t = setInterval(() => goTo(current + 1), 4000);
+    return () => clearInterval(t);
+  }, [current, isPaused, goTo]);
 
-  // Touch/swipe support
-  const onTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
+  const onTouchStart = (e: React.TouchEvent) => { touchStart.current = e.touches[0].clientX; };
   const onTouchEnd = (e: React.TouchEvent) => {
-    touchEndX.current = e.changedTouches[0].clientX;
-    const diff = touchStartX.current - touchEndX.current;
-    if (Math.abs(diff) > 50) {
-      diff > 0 ? next() : prev();
-    }
+    const diff = touchStart.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { diff > 0 ? next() : prev(); setIsPaused(true); }
   };
 
-  // Show 3 pagination dots around current
-  const visibleDots = () => {
-    const dots: number[] = [];
-    const range = 4;
-    for (let i = Math.max(0, current - range); i <= Math.min(total - 1, current + range); i++) {
-      dots.push(i);
-    }
-    return dots;
-  };
+  // Visible thumbnail range
+  const thumbStart = Math.max(0, Math.min(current - 3, total - 7));
+  const thumbRange = workImages.slice(thumbStart, thumbStart + 7);
 
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Section Header */}
-        <div className="text-center mb-12">
-          <span className="inline-block px-4 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold mb-4">
-            Our Portfolio
-          </span>
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4">
-            Recent Work
-          </h2>
-          <p className="text-lg text-gray-500 max-w-xl mx-auto">
-            Real projects completed by our expert team. Quality craftsmanship you can trust.
-          </p>
-        </div>
+    <section className="section-pad" style={{ background: 'linear-gradient(180deg, #F8FAFF 0%, #EEF2FF 100%)' }}>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
 
-        {/* Slideshow Container */}
-        <div
-          className="relative max-w-4xl mx-auto"
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-10"
+        >
+          <span className="section-badge mb-4 inline-flex">📸 Our Portfolio</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#1A1A2E] mb-3 leading-tight">
+            Real Work. <span className="gradient-text-blue">Real Results.</span>
+          </h2>
+          <p className="text-gray-500 text-base max-w-xl mx-auto">
+            Photos from actual jobs completed by our team. Quality you can see.
+          </p>
+        </motion.div>
+
+        {/* Slideshow */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="relative rounded-3xl overflow-hidden shadow-2xl bg-gray-900"
+          style={{ aspectRatio: '16/9' }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
-          {/* Main Image */}
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gray-900 aspect-[4/3] md:aspect-[16/9]">
-            {/* Show current + adjacent for smooth transition */}
-            {workImages.map((src, i) => (
-              <div
-                key={src}
-                className="absolute inset-0 transition-all duration-500 ease-in-out"
-                style={{
-                  opacity: i === current ? 1 : 0,
-                  transform: `scale(${i === current ? 1 : 1.05})`,
-                  zIndex: i === current ? 1 : 0,
-                }}
-              >
+          {/* Images */}
+          {workImages.map((src, i) => (
+            <div
+              key={src}
+              className="absolute inset-0 transition-opacity duration-700"
+              style={{ opacity: i === current ? 1 : 0, zIndex: i === current ? 1 : 0 }}
+            >
+              {(loaded.has(i) || i === current) && (
                 <Image
                   src={src}
-                  alt={`Shree Devi Services work ${i + 1}`}
+                  alt={`Shree Devi Services completed work ${i + 1}`}
                   fill
                   className="object-cover"
                   priority={i === 0}
-                  sizes="(max-width: 768px) 100vw, 896px"
+                  sizes="(max-width: 768px) 100vw, 900px"
                 />
-              </div>
-            ))}
-
-            {/* Gradient overlay bottom */}
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent z-10" />
-
-            {/* Image counter */}
-            <div className="absolute bottom-4 left-4 z-20 text-white/90 text-sm font-medium backdrop-blur-sm bg-black/30 px-3 py-1 rounded-full">
-              {current + 1} / {total}
+              )}
             </div>
+          ))}
 
-            {/* Prev/Next Buttons */}
-            <button
-              onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95"
-              aria-label="Previous image"
-            >
-              <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button
-              onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95"
-              aria-label="Next image"
-            >
-              <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 z-10 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%)' }} />
+
+          {/* Counter badge */}
+          <div className="absolute top-4 right-4 z-20 px-3.5 py-1.5 rounded-full text-white text-sm font-bold"
+            style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}>
+            📷 {current + 1} / {total}
           </div>
 
-          {/* Thumbnail strip */}
-          <div className="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-hide justify-center">
-            {workImages.slice(Math.max(0, current - 3), current + 7).map((src, idx) => {
-              const realIdx = Math.max(0, current - 3) + idx;
-              return (
-                <button
-                  key={src}
-                  onClick={() => goTo(realIdx)}
-                  className={`flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                    realIdx === current ? 'border-blue-500 scale-105 shadow-md' : 'border-transparent opacity-60 hover:opacity-90'
-                  }`}
-                >
-                  <Image
-                    src={src}
-                    alt={`Thumbnail ${realIdx + 1}`}
-                    width={64}
-                    height={48}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              );
-            })}
+          {/* Progress bar */}
+          <div className="absolute bottom-0 left-0 right-0 z-20 h-1 bg-white/20">
+            <motion.div
+              className="h-full bg-white"
+              key={current}
+              initial={{ width: '0%' }}
+              animate={{ width: '100%' }}
+              transition={{ duration: isPaused ? 0 : 4, ease: 'linear' }}
+            />
           </div>
 
-          {/* Pagination dots */}
-          <div className="flex items-center justify-center gap-1.5 mt-5">
-            {current > 4 && <span className="text-gray-300 text-xs">•••</span>}
-            {visibleDots().map((i) => (
+          {/* Prev / Next */}
+          <button
+            onClick={() => { prev(); setIsPaused(true); }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95"
+            style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.3)' }}
+            aria-label="Previous"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => { next(); setIsPaused(true); }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full flex items-center justify-center text-white transition-all hover:scale-110 active:scale-95"
+            style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.3)' }}
+            aria-label="Next"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </motion.div>
+
+        {/* Thumbnail strip */}
+        <div className="flex gap-2.5 mt-4 justify-center overflow-x-auto scrollbar-hide pb-1">
+          {thumbRange.map((src, idx) => {
+            const realIdx = thumbStart + idx;
+            return (
               <button
-                key={i}
-                onClick={() => goTo(i)}
-                className={`rounded-full transition-all duration-300 ${
-                  i === current
-                    ? 'w-6 h-2.5 bg-blue-600'
-                    : 'w-2.5 h-2.5 bg-gray-300 hover:bg-gray-400'
-                }`}
-                aria-label={`Go to slide ${i + 1}`}
-              />
-            ))}
-            {current < total - 5 && <span className="text-gray-300 text-xs">•••</span>}
-          </div>
+                key={src}
+                onClick={() => { goTo(realIdx); setIsPaused(true); }}
+                className="flex-shrink-0 rounded-xl overflow-hidden transition-all"
+                style={{
+                  width: 72, height: 52,
+                  outline: realIdx === current ? '3px solid #1565C0' : '3px solid transparent',
+                  outlineOffset: '2px',
+                  opacity: realIdx === current ? 1 : 0.6,
+                  transform: realIdx === current ? 'scale(1.05)' : 'scale(1)',
+                }}
+                aria-label={`Go to photo ${realIdx + 1}`}
+              >
+                <Image src={src} alt={`Thumbnail ${realIdx + 1}`} width={72} height={52} className="w-full h-full object-cover" />
+              </button>
+            );
+          })}
         </div>
 
-        {/* View Full Gallery Button */}
-        <div className="text-center mt-10">
-          <Link
-            href="/gallery"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-full text-lg shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            View Full Gallery
+        {/* View Gallery CTA */}
+        <div className="text-center mt-8">
+          <Link href="/gallery" className="btn-primary inline-flex gap-2 text-base">
+            <Images className="w-5 h-5" />
+            View All {total} Photos
           </Link>
-          <p className="text-sm text-gray-400 mt-3">{total} completed project photos</p>
+          <p className="text-gray-400 text-sm mt-2">Real photos from completed projects</p>
         </div>
       </div>
     </section>

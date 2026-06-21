@@ -9,8 +9,9 @@ const testimonials = [
     name: 'Ramesh Shetty',
     location: 'Shankarpura, Udupi',
     rating: 5,
-    text: 'Excellent service! The electrician came the same day and fixed our power failure issue in under 2 hours. Very professional and clean work.',
+    text: 'Excellent service! The electrician came the same day and fixed our power failure in under 2 hours. Very professional and clean work.',
     service: 'Electrical Repair',
+    avatarColor: '#1565C0',
   },
   {
     name: 'Savitha Rao',
@@ -18,6 +19,7 @@ const testimonials = [
     rating: 5,
     text: 'Best plumbers in Udupi. Fixed our leaking pipe without any mess. Very punctual and polite. Highly recommend Shree Devi Services!',
     service: 'Plumbing Repair',
+    avatarColor: '#7B1FA2',
   },
   {
     name: 'Kiran Prabhu',
@@ -25,6 +27,7 @@ const testimonials = [
     rating: 5,
     text: 'Called them for an emergency at night — they arrived within 30 minutes! Professional, affordable, and very responsive on WhatsApp.',
     service: 'Emergency Repair',
+    avatarColor: '#BF360C',
   },
   {
     name: 'Deepa Nayak',
@@ -32,6 +35,7 @@ const testimonials = [
     rating: 4,
     text: 'AC was not cooling for weeks. They serviced it quickly and the cooling is back to normal. Great service, will definitely call again.',
     service: 'AC Servicing',
+    avatarColor: '#00838F',
   },
   {
     name: 'Suresh Kamath',
@@ -39,6 +43,7 @@ const testimonials = [
     rating: 5,
     text: 'Had bathroom fitting done. The team was very skilled and completed the work neatly. Neighbours have already asked me for their contact!',
     service: 'Bathroom Fitting',
+    avatarColor: '#2E7D32',
   },
 ];
 
@@ -48,91 +53,150 @@ export default function Testimonials() {
 
   useEffect(() => {
     if (!autoPlay) return;
-    const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(interval);
+    const t = setInterval(() => setCurrent(p => (p + 1) % testimonials.length), 5000);
+    return () => clearInterval(t);
   }, [autoPlay]);
 
-  const next = () => { setCurrent((prev) => (prev + 1) % testimonials.length); setAutoPlay(false); };
-  const prev = () => { setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length); setAutoPlay(false); };
+  const next = () => { setCurrent(p => (p + 1) % testimonials.length); setAutoPlay(false); };
+  const prev = () => { setCurrent(p => (p - 1 + testimonials.length) % testimonials.length); setAutoPlay(false); };
+
+  const t = testimonials[current];
 
   return (
-    <section className="py-32 bg-gradient-to-b from-gray-50 via-white to-blue-50/30 relative overflow-hidden">
-      <motion.div animate={{ y: [0, 20, 0] }} transition={{ duration: 8, repeat: Infinity }} className="absolute top-20 left-0 w-72 h-72 bg-orange-200/10 rounded-full blur-3xl pointer-events-none" />
-      <motion.div animate={{ y: [0, -20, 0] }} transition={{ duration: 10, repeat: Infinity }} className="absolute bottom-20 right-0 w-72 h-72 bg-blue-200/10 rounded-full blur-3xl pointer-events-none" />
+    <section className="section-pad" style={{ background: 'linear-gradient(180deg, #F8FAFF 0%, white 100%)' }}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <motion.div initial={{ opacity: 0, y: -20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-20">
-          <motion.div className="inline-block px-4 py-2 bg-gradient-to-r from-orange-100 to-blue-100 rounded-full mb-4 border border-orange-200/50">
-            <span className="bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent font-semibold text-sm">Real Success Stories</span>
-          </motion.div>
-          <h2 className="text-5xl md:text-6xl font-black mb-6">
-            <span className="bg-gradient-to-r from-orange-500 via-blue-600 to-blue-700 bg-clip-text text-transparent">What Customers Say</span>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <span className="section-badge mb-4 inline-flex">⭐ Customer Stories</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#1A1A2E] mb-4 leading-tight">
+            What Our Customers <span className="gradient-text-orange">Say About Us</span>
           </h2>
-          <p className="text-xl text-gray-700 font-medium">Join over 500+ satisfied families across Udupi district using Shree Devi Services</p>
+          <p className="text-gray-500 text-base max-w-md mx-auto">Real reviews from real people in our community</p>
         </motion.div>
 
+        {/* Testimonial Card */}
         <div className="relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={current}
-              initial={{ opacity: 0, x: 100, scale: 0.95 }}
+              initial={{ opacity: 0, x: 60, scale: 0.97 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -100, scale: 0.95 }}
-              transition={{ duration: 0.5 }}
-              className="relative bg-gradient-to-br from-white via-blue-50/30 to-white rounded-3xl p-8 md:p-12 shadow-2xl border border-blue-100/50 overflow-hidden"
+              exit={{ opacity: 0, x: -60, scale: 0.97 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              className="rounded-3xl p-7 md:p-10"
+              style={{
+                background: 'white',
+                boxShadow: '0 8px 48px rgba(21,101,192,0.1)',
+                border: '2px solid rgba(21,101,192,0.08)',
+              }}
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-200/20 to-blue-200/20 rounded-full blur-2xl pointer-events-none" />
-              <div className="relative flex items-start gap-6 mb-8">
-                <motion.div whileHover={{ scale: 1.1, rotate: 360 }} transition={{ duration: 0.5 }} className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0 shadow-lg border-2 border-blue-400/30">
-                  {testimonials[current].name[0]}
-                </motion.div>
-                <div className="flex-1 pt-1">
-                  <h4 className="text-2xl font-bold text-gray-900">{testimonials[current].name}</h4>
-                  <div className="flex items-center gap-2 mt-2">
-                    <p className="text-sm font-semibold text-gray-600">📍 {testimonials[current].location}</p>
-                    <span className="text-gray-300">•</span>
-                    <p className="text-sm font-bold bg-gradient-to-r from-orange-600 to-orange-500 bg-clip-text text-transparent">{testimonials[current].service}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-2 mb-6">
-                {[...Array(testimonials[current].rating)].map((_, i) => (
-                  <motion.div key={i} initial={{ rotate: 0, scale: 0.8 }} animate={{ rotate: 360, scale: 1 }} transition={{ delay: i * 0.1, duration: 0.6 }}>
-                    <Star size={24} className="fill-amber-400 text-amber-400 drop-shadow-md" />
-                  </motion.div>
+              {/* Quote mark */}
+              <div className="text-7xl font-black text-[#1565C0] opacity-10 leading-none mb-2 select-none">"</div>
+
+              {/* Stars */}
+              <div className="flex gap-1 mb-5">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="w-5 h-5"
+                    fill={i < t.rating ? '#F59E0B' : 'none'}
+                    stroke={i < t.rating ? '#F59E0B' : '#D1D5DB'}
+                    strokeWidth={2}
+                  />
                 ))}
               </div>
-              <p className="text-lg text-gray-700 leading-relaxed italic font-medium">"{testimonials[current].text}"</p>
+
+              {/* Text */}
+              <p className="text-gray-700 text-lg md:text-xl leading-relaxed font-medium mb-8">
+                "{t.text}"
+              </p>
+
+              {/* Author */}
+              <div className="flex items-center gap-4">
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-black flex-shrink-0"
+                  style={{ background: `linear-gradient(135deg, ${t.avatarColor}, ${t.avatarColor}AA)` }}
+                >
+                  {t.name[0]}
+                </div>
+                <div>
+                  <p className="font-black text-[#1A1A2E] text-base">{t.name}</p>
+                  <p className="text-gray-400 text-sm">📍 {t.location}</p>
+                </div>
+                <div className="ml-auto">
+                  <span
+                    className="px-3.5 py-1.5 rounded-full text-xs font-bold"
+                    style={{ background: '#E3F2FD', color: '#1565C0' }}
+                  >
+                    {t.service}
+                  </span>
+                </div>
+              </div>
             </motion.div>
           </AnimatePresence>
 
-          <div className="flex justify-between items-center mt-8">
-            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={prev} className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
-              <ChevronLeft size={24} />
-            </motion.button>
+          {/* Controls */}
+          <div className="flex items-center justify-between mt-6">
+            <button
+              onClick={prev}
+              className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+              style={{ background: '#1565C0', color: 'white' }}
+              aria-label="Previous testimonial"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+
+            {/* Dot indicators */}
             <div className="flex gap-2">
-              {testimonials.map((_, index) => (
-                <motion.button key={index} onClick={() => { setCurrent(index); setAutoPlay(false); }} className={`h-3 rounded-full transition-all ${index === current ? 'bg-blue-600 w-8' : 'bg-gray-300 w-3'}`} whileHover={{ scale: 1.2 }} />
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => { setCurrent(i); setAutoPlay(false); }}
+                  className="rounded-full transition-all duration-300"
+                  style={{
+                    width: i === current ? 28 : 10,
+                    height: 10,
+                    background: i === current ? '#1565C0' : '#CBD5E1',
+                  }}
+                  aria-label={`Go to review ${i + 1}`}
+                />
               ))}
             </div>
-            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={next} className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
-              <ChevronRight size={24} />
-            </motion.button>
+
+            <button
+              onClick={next}
+              className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+              style={{ background: '#1565C0', color: 'white' }}
+              aria-label="Next testimonial"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="grid grid-cols-3 gap-8 mt-16 pt-12 border-t border-gray-200 text-center">
+        {/* Stats row */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+          className="grid grid-cols-3 gap-5 mt-10 pt-8 border-t border-gray-100"
+        >
           {[
-            { stat: '4.8★', label: 'Average Rating' },
-            { stat: '500+', label: 'Happy Customers' },
-            { stat: '1K+', label: 'Services Completed' },
-          ].map((item, idx) => (
-            <motion.div key={idx} whileHover={{ scale: 1.05 }} initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: idx * 0.1 }}>
-              <p className="text-3xl font-bold text-blue-600">{item.stat}</p>
-              <p className="text-gray-600 mt-2">{item.label}</p>
-            </motion.div>
+            { stat: '4.8★', label: 'Average Rating', color: '#F59E0B' },
+            { stat: '500+', label: 'Happy Customers', color: '#1565C0' },
+            { stat: '1K+', label: 'Services Done', color: '#2E7D32' },
+          ].map((item) => (
+            <div key={item.label} className="text-center">
+              <p className="text-2xl md:text-3xl font-black" style={{ color: item.color }}>{item.stat}</p>
+              <p className="text-gray-500 text-xs md:text-sm mt-1 font-semibold">{item.label}</p>
+            </div>
           ))}
         </motion.div>
       </div>

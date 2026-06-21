@@ -1,91 +1,183 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { MapPin, Phone, Mail, Clock } from 'lucide-react';
 import Link from 'next/link';
+
+const WA_ICON = (
+  <svg className="w-5 h-5 fill-current flex-shrink-0" viewBox="0 0 24 24">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.272-.099-.47-.148-.67.15-.23.381-.846.954-1.035 1.154-.193.199-.378.222-.675.041-.297-.182-1.022-.378-1.852-.571-.685-.187-1.292-.46-1.801-.999-.509-.54-.809-1.234-.936-2.031-.099-.707-.001-1.259.194-1.497.196-.237.461-.592.692-.888.23-.297.323-.507.323-.846 0-.338-.108-.646-.273-.883-.165-.237-.982-.451-1.334-.451-.352 0-1.139.223-1.734.671-.595.449-.74 1.236-.888 1.884-.148.648.15 1.295.784 2.107.633.812 2.213 2.334 4.776 3.359 2.563 1.025 3.566 1.07 4.101 1.07.535 0 .848-.223 1.195-.671.347-.449.462-.898.616-1.195.154-.297.308-.447.606-.447.298 0 1.895.223 2.21.671.316.449.316 1.236.079 1.934-.237.697-.883 1.295-1.779 1.534z" />
+  </svg>
+);
+
+const footerLinks = [
+  {
+    title: 'Services',
+    links: [
+      { label: 'Electrical', href: '/file-complaint' },
+      { label: 'Plumbing', href: '/file-complaint' },
+      { label: 'Water Tank Cleaning', href: '/file-complaint' },
+      { label: 'Appliance Repair', href: '/file-complaint' },
+      { label: 'Emergency Repair', href: '/file-complaint' },
+    ],
+  },
+  {
+    title: 'Quick Links',
+    links: [
+      { label: 'Book a Service', href: '/file-complaint' },
+      { label: 'Track My Request', href: '/track-complaint' },
+      { label: 'Gallery', href: '/gallery' },
+      { label: 'Give Feedback', href: '/feedback' },
+      { label: 'All Services', href: '/services' },
+    ],
+  },
+];
 
 export function Footer() {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Brand */}
-          <div className="md:col-span-1">
-            <div className="flex items-center gap-1 mb-3">
-              <span className="text-xl font-black text-blue-400">Shree Devi</span>
-              <span className="text-xl font-black text-orange-400">Services</span>
-            </div>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Trusted home maintenance experts in Shankarpura, Udupi. Electrical, plumbing, and appliance repairs with same-day service.
+    <footer id="contact" className="relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #0D1B3E 0%, #050D1F 100%)' }}>
+      {/* Decorative blobs */}
+      <div className="absolute bottom-20 right-0 w-96 h-96 rounded-full opacity-5 pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #1565C0 0%, transparent 70%)', transform: 'translate(30%, 0)' }} />
+      <div className="absolute top-20 left-0 w-72 h-72 rounded-full opacity-5 pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #F57C00 0%, transparent 70%)', transform: 'translate(-30%, 0)' }} />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-8 relative">
+
+        {/* Emergency Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="rounded-3xl p-7 md:p-10 mb-14 text-center relative overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #B71C1C, #C62828, #D32F2F)', border: '1px solid rgba(255,255,255,0.15)' }}
+        >
+          <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-10 pointer-events-none"
+            style={{ background: 'radial-gradient(circle, white, transparent)', transform: 'translate(30%, -30%)' }} />
+          <div className="relative z-10">
+            <p className="text-3xl md:text-4xl font-black text-white mb-3">⚡ Emergency? We're Here 24/7</p>
+            <p className="text-red-200 text-base md:text-lg mb-7 max-w-lg mx-auto">
+              Urgent repair needed? Call or WhatsApp us immediately. We respond within <strong className="text-white">15 minutes</strong>.
             </p>
-            <div className="mt-4 flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-sm mx-auto">
               <a
-                href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20assistance%20with%20a%20maintenance%20issue."
+                href="https://wa.me/917337843016?text=EMERGENCY%20-%20I%20need%20urgent%20repair%20help."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition"
+                className="btn-whatsapp flex-1 justify-center text-base"
               >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.272-.099-.47-.148-.67.15-.23.381-.846.954-1.035 1.154-.193.199-.378.222-.675.041-.297-.182-1.022-.378-1.852-.571-.685-.187-1.292-.46-1.801-.999-.509-.54-.809-1.234-.936-2.031-.099-.707-.001-1.259.194-1.497.196-.237.461-.592.692-.888.23-.297.323-.507.323-.846 0-.338-.108-.646-.273-.883-.165-.237-.982-.451-1.334-.451-.352 0-1.139.223-1.734.671-.595.449-.74 1.236-.888 1.884-.148.648.15 1.295.784 2.107.633.812 2.213 2.334 4.776 3.359 2.563 1.025 3.566 1.07 4.101 1.07.535 0 .848-.223 1.195-.671.347-.449.462-.898.616-1.195.154-.297.308-.447.606-.447.298 0 1.895.223 2.21.671.316.449.316 1.236.079 1.934-.237.697-.883 1.295-1.779 1.534z" />
-                </svg>
-                WhatsApp
+                {WA_ICON}
+                Emergency WhatsApp
+              </a>
+              <a
+                href="tel:+917337843016"
+                className="flex items-center justify-center gap-2 flex-1 min-h-[56px] rounded-full bg-white text-red-700 font-bold text-base hover:bg-red-50 transition-colors"
+              >
+                📞 Call Now
               </a>
             </div>
           </div>
+        </motion.div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-bold mb-4 text-white">Quick Links</h4>
-            <ul className="space-y-2 text-gray-400 text-sm">
-              <li><Link href="/" className="hover:text-white transition">Home</Link></li>
-              <li><Link href="/services" className="hover:text-white transition">Services</Link></li>
-              <li><Link href="/gallery" className="hover:text-white transition">Gallery</Link></li>
-              <li><Link href="/file-complaint" className="hover:text-white transition">Book Service</Link></li>
-              <li><Link href="/feedback" className="hover:text-white transition">Feedback</Link></li>
-            </ul>
-          </div>
+        {/* Main Footer Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
 
-          {/* Services */}
-          <div>
-            <h4 className="font-bold mb-4 text-white">Our Services</h4>
-            <ul className="space-y-2 text-gray-400 text-sm">
-              <li>⚡ Electrical Repairs</li>
-              <li>🔧 Plumbing Services</li>
-              <li>❄️ AC Servicing</li>
-              <li>🔌 Appliance Repair</li>
-              <li>🚿 Bathroom Fitting</li>
-              <li>💡 Wiring & Fitting</li>
-            </ul>
-          </div>
+          {/* Brand */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="text-2xl font-black text-white mb-2">
+              <span style={{ color: '#42A5F5' }}>Shree Devi</span>{' '}
+              <span style={{ color: '#FFB300' }}>Services</span>
+            </h3>
+            <p className="text-gray-400 text-sm leading-relaxed mb-6">
+              Trusted home maintenance experts in Udupi district. Fast, reliable, professional. Serving families since 2020.
+            </p>
+            <div className="space-y-3">
+              <a href="tel:+917337843016" className="flex items-center gap-3 text-gray-300 hover:text-white transition-colors group">
+                <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 transition-colors">
+                  <Phone className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-medium">+91 73378 43016</span>
+              </a>
+              <a href="mailto:manvithnaik612@gmail.com" className="flex items-center gap-3 text-gray-300 hover:text-white transition-colors group">
+                <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-white/20 transition-colors">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-medium">manvithnaik612@gmail.com</span>
+              </a>
+              <div className="flex items-start gap-3 text-gray-300">
+                <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <span className="text-sm font-medium">Shankarpura, Udupi, Karnataka</span>
+              </div>
+            </div>
+          </motion.div>
 
-          {/* Contact */}
-          <div>
-            <h4 className="font-bold mb-4 text-white">Contact Us</h4>
-            <ul className="space-y-3 text-gray-400 text-sm">
+          {/* Services & Links */}
+          {footerLinks.map((col, i) => (
+            <motion.div
+              key={col.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: (i + 1) * 0.1 }}
+            >
+              <h4 className="font-black text-base text-white mb-5">{col.title}</h4>
+              <ul className="space-y-3">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="flex items-center gap-2 text-gray-400 hover:text-white text-sm font-medium transition-colors group"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#1565C0] flex-shrink-0 group-hover:bg-[#F57C00] transition-colors" />
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
+
+          {/* Working Hours */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            <h4 className="font-black text-base text-white mb-5 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-[#42A5F5]" />
+              Working Hours
+            </h4>
+            <ul className="space-y-3 text-sm">
+              {[
+                { day: 'Monday – Friday', hours: '8:00 AM – 8:00 PM' },
+                { day: 'Saturday – Sunday', hours: '9:00 AM – 6:00 PM' },
+              ].map((item) => (
+                <li key={item.day} className="pb-3 border-b border-white/10 last:border-0">
+                  <p className="text-gray-300 font-semibold">{item.day}</p>
+                  <p className="text-gray-500 text-xs mt-0.5">{item.hours}</p>
+                </li>
+              ))}
               <li>
-                <a href="tel:+917337843016" className="hover:text-white transition flex items-center gap-2">
-                  📞 +91 73378 43016
-                </a>
-              </li>
-              <li>
-                <a href="mailto:manvithnaik612@gmail.com" className="hover:text-white transition flex items-center gap-2">
-                  ✉️ manvithnaik612@gmail.com
-                </a>
-              </li>
-              <li className="flex items-start gap-2">
-                <span>📍</span>
-                <span>Shankarpura, Udupi, Karnataka</span>
-              </li>
-              <li className="text-green-400 font-medium">
-                🕐 Available 24/7 for emergencies
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white"
+                  style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)' }}>
+                  🌙 24/7 Emergency Support
+                </span>
               </li>
             </ul>
-          </div>
+          </motion.div>
         </div>
 
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-center text-gray-400 text-sm">
-            © {new Date().getFullYear()} Shree Devi Services. All rights reserved.
-          </p>
-          <p className="text-gray-500 text-xs">
-            Fast · Reliable · Trusted in Udupi, Karnataka
-          </p>
+        {/* Bottom bar */}
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-3 text-gray-500 text-sm">
+          <p>© {new Date().getFullYear()} Shree Devi Services. All rights reserved.</p>
+          <p>Made with ❤️ in Udupi, Karnataka 🇮🇳</p>
         </div>
       </div>
     </footer>

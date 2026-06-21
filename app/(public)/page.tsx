@@ -4,10 +4,11 @@ import { WhyChooseUs } from '@/components/public/WhyChooseUs';
 import { RecentWork } from '@/components/RecentWork';
 import { HowItWorks } from '@/components/HowItWorks';
 import { AreasWeServe } from '@/components/AreasWeServe';
+import Testimonials from '@/components/Testimonials';
 
 export const metadata = {
-  title: 'Home | Shree Devi Services',
-  description: 'Trusted electrical, plumbing, and maintenance services in Shankarpura, Udupi, Karnataka. Fast, reliable, same-day support.',
+  title: 'Shree Devi Services — Electrical & Plumbing in Udupi, Shankarpura',
+  description: 'Trusted home maintenance experts in Shankarpura, Udupi. Electricians, plumbers, AC service & appliance repair. Same-day service, 24/7 emergency support. Book online!',
 };
 
 export default function Home() {
@@ -18,6 +19,7 @@ export default function Home() {
       <HowItWorks />
       <RecentWork />
       <WhyChooseUs />
+      <Testimonials />
       <AreasWeServe />
     </div>
   );
