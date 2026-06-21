@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Phone, Zap, Droplet, Wrench, Waves, Hammer, Home, CheckCircle } from 'lucide-react';
 
@@ -34,9 +35,32 @@ const stats = [
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #0D47A1 0%, #1565C0 40%, #1976D2 70%, #1E3A5F 100%)' }}>
-      {/* Decorative blobs */}
-      <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10 pointer-events-none" style={{ background: 'radial-gradient(circle, #F57C00 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
+    <section className="relative overflow-hidden" style={{ background: '#0D47A1' }}>
+      {/* ── Background photo ── */}
+      <div className="absolute inset-0">
+        <Image
+          src="/hero-bg.jpg"
+          alt="Professional home maintenance service in Udupi"
+          fill
+          className="object-cover object-center"
+          priority
+          quality={85}
+          sizes="100vw"
+        />
+        {/* Multi-layer gradient overlay for readability */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(160deg, rgba(13,71,161,0.90) 0%, rgba(21,101,192,0.82) 40%, rgba(25,118,210,0.78) 70%, rgba(30,58,95,0.92) 100%)',
+          }}
+        />
+        {/* Bottom fade to match page bg */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, rgba(13,71,161,0.5))' }} />
+      </div>
+
+      {/* Decorative blobs on top of photo */}
+      <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-15 pointer-events-none" style={{ background: 'radial-gradient(circle, #F57C00 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
       <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-10 pointer-events-none" style={{ background: 'radial-gradient(circle, #42A5F5 0%, transparent 70%)', transform: 'translate(-30%, 30%)' }} />
       <div className="absolute inset-0 hero-pattern pointer-events-none" />
 
