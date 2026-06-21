@@ -1,0 +1,202 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { Phone, Wrench, Zap } from 'lucide-react';
+
+const team = [
+  {
+    name: 'Mr. Saieesh Kumar',
+    role: 'Co-Founder & Chief Electrical Technician',
+    photo: '/founder-saieesh.jpg',
+    expertise: ['Electrical Wiring', 'Power Systems', 'Fan & Lighting'],
+    experience: '5+ Years',
+    badge: '⚡',
+    badgeLabel: 'Electrical Expert',
+    color: '#C84B11',
+    gradient: 'linear-gradient(135deg, #C84B11, #E05A1A)',
+    bio: 'Saieesh brings deep expertise in electrical systems — from household wiring and fault-finding to complete panel setups. Known for his precision and speed, he has personally handled over 2,000 electrical jobs across Udupi district.',
+    speciality: 'Electrical & Power Systems',
+  },
+  {
+    name: 'Mr. Sampath Kumar',
+    role: 'Co-Founder & Chief Service Technician',
+    photo: '/founder-sampath.jpg',
+    expertise: ['Plumbing', 'Appliance Repair', 'Home Maintenance'],
+    experience: '6+ Years',
+    badge: '🔧',
+    badgeLabel: 'Service Expert',
+    color: '#1A3A5C',
+    gradient: 'linear-gradient(135deg, #1A3A5C, #2A5080)',
+    bio: 'Sampath leads our service operations with exceptional technical knowledge in plumbing, appliance repair, and general home maintenance. His dedication to customer satisfaction has earned us thousands of 5-star reviews.',
+    speciality: 'Plumbing & Appliance Repair',
+  },
+];
+
+export function MeetTheTeam() {
+  return (
+    <section className="section-pad bg-card relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-10 right-10 w-64 h-64 rounded-full opacity-[0.04]"
+          style={{ background: 'radial-gradient(circle, #C84B11, transparent)' }} />
+        <div className="absolute bottom-10 left-10 w-64 h-64 rounded-full opacity-[0.04]"
+          style={{ background: 'radial-gradient(circle, #1A3A5C, transparent)' }} />
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
+
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-14"
+        >
+          <span className="section-badge mb-4 inline-flex">👥 Meet the Team</span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground mb-4 leading-tight">
+            The People Behind{' '}
+            <span className="gradient-text-terra">Your Home's Safety</span>
+          </h2>
+          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+            Our founders are not just managers — they are hands-on technicians who personally
+            handle the toughest jobs to ensure the highest quality.
+          </p>
+        </motion.div>
+
+        {/* Team Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {team.map((member, i) => (
+            <motion.div
+              key={member.name}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.15, duration: 0.6 }}
+              className="relative rounded-3xl overflow-hidden bg-background border-2 group"
+              style={{ borderColor: `${member.color}20`, boxShadow: `0 4px 32px ${member.color}10` }}
+            >
+              {/* Top colour bar */}
+              <div className="h-1.5 w-full" style={{ background: member.gradient }} />
+
+              <div className="p-7 md:p-8">
+                {/* Photo + Name Row */}
+                <div className="flex items-start gap-5 mb-6">
+                  {/* Photo */}
+                  <div className="relative flex-shrink-0">
+                    <div
+                      className="w-28 h-28 rounded-2xl overflow-hidden shadow-xl border-4"
+                      style={{ borderColor: `${member.color}30` }}
+                    >
+                      <Image
+                        src={member.photo}
+                        alt={`Photo of ${member.name}`}
+                        width={112}
+                        height={112}
+                        className="w-full h-full object-cover object-top"
+                        quality={90}
+                      />
+                    </div>
+                    {/* Badge */}
+                    <div
+                      className="absolute -bottom-2.5 -right-2.5 w-9 h-9 rounded-xl flex items-center justify-center text-base shadow-md border-2 border-card"
+                      style={{ background: member.gradient }}
+                    >
+                      {member.badge}
+                    </div>
+                  </div>
+
+                  {/* Name & Role */}
+                  <div className="flex-1 min-w-0 pt-1">
+                    <h3 className="text-xl font-black text-foreground leading-tight mb-1">
+                      {member.name}
+                    </h3>
+                    <p className="text-sm font-semibold mb-3" style={{ color: member.color }}>
+                      {member.role}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {/* Experience chip */}
+                      <span
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white"
+                        style={{ background: member.gradient }}
+                      >
+                        🏅 {member.experience} Experience
+                      </span>
+                      {/* Speciality chip */}
+                      <span
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
+                        style={{ background: `${member.color}12`, color: member.color, border: `1px solid ${member.color}25` }}
+                      >
+                        {member.badgeLabel}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bio */}
+                <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                  {member.bio}
+                </p>
+
+                {/* Expertise tags */}
+                <div className="mb-6">
+                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2.5">
+                    Areas of Expertise
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {member.expertise.map((skill) => (
+                      <span
+                        key={skill}
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold border"
+                        style={{
+                          background: `${member.color}08`,
+                          color: member.color,
+                          borderColor: `${member.color}20`,
+                        }}
+                      >
+                        ✓ {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <a
+                  href={`https://wa.me/917337843016?text=Hello%20${encodeURIComponent(member.name)}%2C%20I%20need%20help%20with%20${encodeURIComponent(member.speciality)}.`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2.5 w-full py-3.5 rounded-2xl text-white font-bold text-sm transition-all active:scale-95 hover:opacity-90"
+                  style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)' }}
+                >
+                  <svg className="w-5 h-5 fill-current flex-shrink-0" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.272-.099-.47-.148-.67.15-.23.381-.846.954-1.035 1.154-.193.199-.378.222-.675.041-.297-.182-1.022-.378-1.852-.571-.685-.187-1.292-.46-1.801-.999-.509-.54-.809-1.234-.936-2.031-.099-.707-.001-1.259.194-1.497.196-.237.461-.592.692-.888.23-.297.323-.507.323-.846 0-.338-.108-.646-.273-.883-.165-.237-.982-.451-1.334-.451-.352 0-1.139.223-1.734.671-.595.449-.74 1.236-.888 1.884-.148.648.15 1.295.784 2.107.633.812 2.213 2.334 4.776 3.359 2.563 1.025 3.566 1.07 4.101 1.07.535 0 .848-.223 1.195-.671.347-.449.462-.898.616-1.195.154-.297.308-.447.606-.447.298 0 1.895.223 2.21.671.316.449.316 1.236.079 1.934-.237.697-.883 1.295-1.779 1.534z" />
+                  </svg>
+                  Chat with {member.name.split(' ')[1]}
+                </a>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Bottom trust note */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4 }}
+          className="mt-10 text-center"
+        >
+          <div
+            className="inline-flex items-center gap-3 px-6 py-4 rounded-2xl text-sm font-semibold border-2"
+            style={{ background: 'linear-gradient(135deg, rgba(26,58,92,0.06), rgba(200,75,17,0.06))', borderColor: 'rgba(200,75,17,0.15)' }}
+          >
+            <span className="text-2xl">🤝</span>
+            <span className="text-foreground">
+              Both founders personally inspect every completed job — your satisfaction is their promise.
+            </span>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}

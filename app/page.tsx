@@ -4,6 +4,7 @@ import { MobileStickyBar } from '@/components/MobileStickyBar';
 import { Hero } from '@/components/public/Hero';
 import { Services } from '@/components/public/Services';
 import { WhyChooseUs } from '@/components/public/WhyChooseUs';
+import { MeetTheTeam } from '@/components/public/MeetTheTeam';
 import { RecentWork } from '@/components/RecentWork';
 import { HowItWorks } from '@/components/HowItWorks';
 import { AreasWeServe } from '@/components/AreasWeServe';
@@ -24,6 +25,7 @@ export default function Home() {
         <HowItWorks />
         <RecentWork />
         <WhyChooseUs />
+        <MeetTheTeam />
         <Testimonials />
         <AreasWeServe />
       </main>
