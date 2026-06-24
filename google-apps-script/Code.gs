@@ -141,6 +141,49 @@ function doPost(e) {
     var data = JSON.parse(e.postData.contents);
 
     var ss    = SpreadsheetApp.openById(SHEET_ID);
+
+    // Check if feedback request
+    if (data.type === 'feedback') {
+      var feedbackSheet = ss.getSheetByName('Feedback') || ss.insertSheet('Feedback');
+
+      // Add header row if feedbackSheet is empty
+      if (feedbackSheet.getLastRow() === 0) {
+        feedbackSheet.appendRow([
+          'Timestamp',
+          'Name',
+          'Email',
+          'Rating',
+          'Message',
+          'Status'
+        ]);
+
+        // Format header row
+        var headerRange = feedbackSheet.getRange(1, 1, 1, 6);
+        headerRange.setFontWeight('bold');
+        headerRange.setBackground('#34a853'); // Green header for feedback
+        headerRange.setFontColor('#ffffff');
+      }
+
+      // Append feedback row
+      feedbackSheet.appendRow([
+        data.timestamp || new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+        data.name || '',
+        data.email || '',
+        data.rating || '',
+        data.message || '',
+        'Approved'
+      ]);
+
+      feedbackSheet.autoResizeColumns(1, 6);
+
+      // Send Telegram notification for feedback
+      sendTelegramFeedbackNotification(data);
+
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: true, row: feedbackSheet.getLastRow() }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     var sheet = ss.getSheetByName(SHEET_NAME) || ss.getActiveSheet();
 
     // Add header row if sheet is empty
@@ -216,4 +259,52 @@ function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify({ status: 'ok', service: 'Shree Devi Services CRM' }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * Sends a formatted Telegram notification for customer feedback.
+ *
+ * @param {Object} data - The parsed feedback payload.
+ */
+function sendTelegramFeedbackNotification(data) {
+  try {
+    var token = TELEGRAM_BOT_TOKEN;
+    var chatId = TELEGRAM_CHAT_ID;
+    if (!token || !chatId) return;
+
+    var stars = '';
+    var ratingVal = parseInt(data.rating) || 5;
+    for (var i = 0; i < 5; i++) {
+      stars += i < ratingVal ? '⭐' : '☆';
+    }
+
+    var message =
+      '📝 *NEW CUSTOMER FEEDBACK*\n' +
+      '━━━━━━━━━━━━━━━\n\n' +
+      '👤 *Name*\n' + escapeMarkdown(data.name || 'N/A') + '\n\n' +
+      '📧 *Email*\n' + escapeMarkdown(data.email || 'N/A') + '\n\n' +
+      '⭐ *Rating*\n' + stars + ' (' + ratingVal + '/5)\n\n' +
+      '💬 *Feedback*\n' + escapeMarkdown(data.message || 'N/A') + '\n\n' +
+      '━━━━━━━━━━━━━━━';
+
+    var url     = 'https://api.telegram.org/bot' + token + '/sendMessage';
+    var payload = JSON.stringify({
+      chat_id:                  chatId,
+      text:                     message,
+      parse_mode:               'Markdown',
+      disable_web_page_preview: true
+    });
+
+    var options = {
+      method:             'post',
+      contentType:        'application/json',
+      payload:            payload,
+      muteHttpExceptions: true
+    };
+
+    var response = UrlFetchApp.fetch(url, options);
+    console.log('[Telegram Feedback] Response: ' + response.getContentText());
+  } catch (err) {
+    console.error('[Telegram Feedback] Error: ' + err.toString());
+  }
 }

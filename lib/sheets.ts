@@ -64,3 +64,43 @@ export async function submitToSheets(row: SheetRow): Promise<void> {
     }
   }
 }
+
+export type FeedbackRow = {
+  type: 'feedback';
+  timestamp: string;
+  name: string;
+  email: string;
+  rating: number;
+  message: string;
+};
+
+/**
+ * Submit customer feedback to Google Sheets via Apps Script.
+ */
+export async function submitFeedbackToSheets(row: FeedbackRow): Promise<void> {
+  if (!SHEETS_URL || SHEETS_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL') {
+    console.warn('[Sheets] NEXT_PUBLIC_GOOGLE_SHEETS_URL is not configured. Skipping feedback submit.');
+    return;
+  }
+
+  const payload = JSON.stringify(row);
+  console.log('[Sheets] Sending feedback to Apps Script:', row.name, '→', SHEETS_URL);
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      await fetch(SHEETS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: payload,
+      });
+      console.log(`[Sheets] ✅ Feedback request sent (attempt ${attempt}).`);
+      return;
+    } catch (err) {
+      console.error(`[Sheets] ❌ Feedback send network error on attempt ${attempt}:`, err);
+      if (attempt === 2) {
+        throw new Error(`Google Sheets feedback submission failed after ${attempt} attempts: ${err}`);
+      }
+      await new Promise(r => setTimeout(r, 1000));
+    }
+  }
+}

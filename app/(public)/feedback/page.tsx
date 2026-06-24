@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiClient } from '@/lib/api/client';
 import { CreateFeedbackSchema } from '@/lib/schemas';
+import { submitFeedbackToSheets } from '@/lib/sheets';
 import { ZodError } from 'zod';
 import { useMutation } from '@tanstack/react-query';
 
@@ -19,7 +19,19 @@ export default function FeedbackPage() {
   const [successMessage, setSuccessMessage] = useState('');
 
   const mutation = useMutation({
-    mutationFn: (data) => apiClient.createFeedback(data),
+    mutationFn: (data: { name: string; email: string; rating: number; message: string }) =>
+      submitFeedbackToSheets({
+        type: 'feedback',
+        timestamp: new Date().toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        ...data,
+      }),
     onSuccess: () => {
       setSuccessMessage('Thank you for your feedback! We appreciate your input.');
       setFormData({ name: '', email: '', rating: 5, message: '' });
@@ -28,7 +40,7 @@ export default function FeedbackPage() {
     },
     onError: (error: any) => {
       const message =
-        error.response?.data?.message || 'Failed to submit feedback. Please try again.';
+        error.message || 'Failed to submit feedback. Please try again.';
       setErrors({ submit: message });
     },
   });
