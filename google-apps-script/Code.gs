@@ -254,11 +254,45 @@ function doPost(e) {
   }
 }
 
-// ── Handle CORS preflight OPTIONS requests ────────────────────────────────────
+// ── GET: return approved feedback rows as JSON ────────────────────────────────
 function doGet(e) {
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ok', service: 'Shree Devi Services CRM' }))
-    .setMimeType(ContentService.MimeType.JSON);
+  try {
+    var ss    = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('Feedback');
+
+    // No Feedback sheet yet — return empty array
+    if (!sheet || sheet.getLastRow() < 2) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: true, feedback: [] }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Rows start at 2 (row 1 = headers)
+    var numRows = sheet.getLastRow() - 1;
+    var data    = sheet.getRange(2, 1, numRows, 6).getValues();
+
+    var feedback = [];
+    for (var i = 0; i < data.length; i++) {
+      var row = data[i];
+      feedback.push({
+        timestamp : row[0] ? String(row[0]) : '',
+        name      : row[1] ? String(row[1]) : '',
+        email     : row[2] ? String(row[2]) : '',
+        rating    : row[3] ? parseInt(row[3]) || 5 : 5,
+        message   : row[4] ? String(row[4]) : '',
+        status    : row[5] ? String(row[5]) : 'Approved'
+      });
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: true, feedback: feedback }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: err.toString(), feedback: [] }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 /**

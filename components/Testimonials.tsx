@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 
-const testimonials = [
+/* ── Fallback hardcoded reviews (shown when sheet is empty) ─────────────── */
+const FALLBACK = [
   { name:'Ramesh Shetty',  location:'Shankarpura, Udupi', rating:5, text:'Excellent service! The electrician came the same day and fixed our power failure in under 2 hours. Very professional and clean work.', service:'Electrical Repair', color:'#C84B11' },
   { name:'Savitha Rao',    location:'Manipal',            rating:5, text:'Best plumbers in Udupi. Fixed our leaking pipe without any mess. Very punctual and polite. Highly recommend Shree Devi Services!', service:'Plumbing Repair', color:'#1A3A5C' },
   { name:'Kiran Prabhu',   location:'Brahmavara',         rating:5, text:'Called them for an emergency at night — they arrived within 30 minutes! Professional, affordable, and very responsive on WhatsApp.', service:'Emergency Repair', color:'#A03A0A' },
@@ -12,19 +13,60 @@ const testimonials = [
   { name:'Suresh Kamath',  location:'Kaup',               rating:5, text:'Had bathroom fitting done. The team was very skilled and completed the work neatly. Neighbours have already asked me for their contact!', service:'Bathroom Fitting', color:'#2D5A27' },
 ];
 
-export default function Testimonials() {
-  const [current, setCurrent] = useState(0);
-  const [auto, setAuto] = useState(true);
+/* ── Palette of accent colours for live reviews ────────────────────────── */
+const COLORS = ['#C84B11','#1A3A5C','#A03A0A','#00696F','#2D5A27','#6B3FA0','#BF6900','#006994'];
 
+type Review = {
+  name: string;
+  location?: string;
+  rating: number;
+  text: string;
+  service?: string;
+  color: string;
+};
+
+/* ── Map raw sheet row → Review ─────────────────────────────────────────── */
+function shapeReview(item: any, idx: number): Review {
+  return {
+    name    : item.name    || 'Anonymous',
+    location: '',                                         // not captured in feedback form
+    rating  : typeof item.rating === 'number' ? item.rating : 5,
+    text    : item.message || '',
+    service : '',
+    color   : COLORS[idx % COLORS.length],
+  };
+}
+
+export default function Testimonials() {
+  const [reviews, setReviews] = useState<Review[]>(FALLBACK);
+  const [isLive,  setIsLive]  = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [auto,    setAuto]    = useState(true);
+
+  /* Fetch live reviews on mount */
+  useEffect(() => {
+    fetch('/api/reviews')
+      .then(r => r.json())
+      .then(json => {
+        if (Array.isArray(json.feedback) && json.feedback.length > 0) {
+          setReviews(json.feedback.map(shapeReview));
+          setIsLive(true);
+          setCurrent(0);
+        }
+      })
+      .catch(() => { /* silently stay on fallback */ });
+  }, []);
+
+  /* Auto-advance */
   useEffect(() => {
     if (!auto) return;
-    const t = setInterval(() => setCurrent(p => (p + 1) % testimonials.length), 5000);
-    return () => clearInterval(t);
-  }, [auto]);
+    const id = setInterval(() => setCurrent(p => (p + 1) % reviews.length), 5000);
+    return () => clearInterval(id);
+  }, [auto, reviews.length]);
 
-  const next = () => { setCurrent(p => (p + 1) % testimonials.length); setAuto(false); };
-  const prev = () => { setCurrent(p => (p - 1 + testimonials.length) % testimonials.length); setAuto(false); };
-  const t = testimonials[current];
+  const next = () => { setCurrent(p => (p + 1) % reviews.length); setAuto(false); };
+  const prev = () => { setCurrent(p => (p - 1 + reviews.length) % reviews.length); setAuto(false); };
+  const t = reviews[current];
 
   return (
     <section className="section-pad bg-card relative overflow-hidden">
@@ -42,7 +84,9 @@ export default function Testimonials() {
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground mb-4 leading-tight">
             What Our Customers <span className="gradient-text-terra">Say About Us</span>
           </h2>
-          <p className="text-muted-foreground text-base max-w-md mx-auto">Real reviews from real people in our community</p>
+          <p className="text-muted-foreground text-base max-w-md mx-auto">
+            {isLive ? 'Real reviews submitted by our customers' : 'Real reviews from real people in our community'}
+          </p>
         </motion.div>
 
         <div className="relative">
@@ -70,13 +114,15 @@ export default function Testimonials() {
                 </div>
                 <div>
                   <p className="font-black text-foreground text-base">{t.name}</p>
-                  <p className="text-muted-foreground text-sm">📍 {t.location}</p>
+                  {t.location && <p className="text-muted-foreground text-sm">📍 {t.location}</p>}
                 </div>
-                <div className="ml-auto">
-                  <span className="px-3.5 py-1.5 rounded-full text-xs font-bold text-white" style={{ background: t.color }}>
-                    {t.service}
-                  </span>
-                </div>
+                {t.service && (
+                  <div className="ml-auto">
+                    <span className="px-3.5 py-1.5 rounded-full text-xs font-bold text-white" style={{ background: t.color }}>
+                      {t.service}
+                    </span>
+                  </div>
+                )}
               </div>
             </motion.div>
           </AnimatePresence>
@@ -88,7 +134,7 @@ export default function Testimonials() {
               <ChevronLeft className="w-5 h-5" />
             </button>
             <div className="flex gap-2">
-              {testimonials.map((_, i) => (
+              {reviews.map((_, i) => (
                 <button key={i} onClick={() => { setCurrent(i); setAuto(false); }}
                   className="rounded-full transition-all duration-300"
                   style={{ width: i === current ? 28 : 10, height: 10, background: i === current ? '#C84B11' : 'var(--muted)' }} />
