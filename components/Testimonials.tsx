@@ -43,18 +43,33 @@ export default function Testimonials() {
   const [current, setCurrent] = useState(0);
   const [auto,    setAuto]    = useState(true);
 
-  /* Fetch live reviews on mount */
-  useEffect(() => {
+  /* Fetch live reviews — on mount, every 30s, and when tab becomes visible */
+  const fetchReviews = () => {
     fetch('/api/reviews')
       .then(r => r.json())
       .then(json => {
         if (Array.isArray(json.feedback) && json.feedback.length > 0) {
           setReviews(json.feedback.map(shapeReview));
           setIsLive(true);
-          setCurrent(0);
         }
       })
       .catch(() => { /* silently stay on fallback */ });
+  };
+
+  useEffect(() => {
+    fetchReviews();
+
+    // Poll every 30 seconds so new reviews appear without page refresh
+    const interval = setInterval(fetchReviews, 30_000);
+
+    // Also re-fetch immediately when user switches back to this tab
+    const onVisible = () => { if (document.visibilityState === 'visible') fetchReviews(); };
+    document.addEventListener('visibilitychange', onVisible);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, []);
 
   /* Auto-advance */
