@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Phone, Camera, X, RefreshCw, Navigation, CheckCircle, Clock, ChevronRight } from 'lucide-react';
 import { uploadImages } from '@/lib/cloudinary';
 import { submitToSheets } from '@/lib/sheets';
+import { sendTelegramNotification } from '@/lib/telegram';
 import { useToast } from '@/components/ui/Toast';
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -28,17 +29,9 @@ const SERVICE_TYPES = [
   { label: 'Other', emoji: '🔧' },
 ];
 
-const TIME_SLOTS = [
-  { label: 'Morning', sub: '8 AM – 11 AM', emoji: '🌅' },
-  { label: 'Afternoon', sub: '11 AM – 2 PM', emoji: '☀️' },
-  { label: 'Midday', sub: '12 PM – 3 PM', emoji: '🌤️' },
-  { label: 'Evening', sub: '3 PM – 6 PM', emoji: '🌆' },
-  { label: 'Late Evening', sub: '6 PM – 8 PM', emoji: '🌙' },
-  { label: 'Flexible', sub: 'Any Time', emoji: '📅' },
-  { label: 'Emergency', sub: 'ASAP', emoji: '🚨' },
-];
 
-type LocationData = { latitude: number; longitude: number } | null;
+
+type LocationData = { latitude: number; longitude: number; accuracy: number } | null;
 type LocationStatus = 'idle' | 'loading' | 'success' | 'error';
 type ImageItem = { file: File; preview: string; uploadStatus: 'pending' | 'uploading' | 'done' | 'error' };
 type SubmitStage = 'idle' | 'uploading-images' | 'saving-record' | 'sending-email' | 'done' | 'error';
@@ -50,7 +43,6 @@ type FormFields = {
   description: string;
   address: string;
   landmark: string;
-  preferredTime: string;
 };
 
 function generateRefNumber(): string {
@@ -118,17 +110,23 @@ function SectionCard({ num, title, emoji, children }: { num: string; title: stri
 
 export default function ServiceRequestForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const { success: toastSuccess, error: toastError, info: toastInfo } = useToast();
+  const [showMobileSheet, setShowMobileSheet] = useState(false);
+
+  const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const [form, setForm] = useState<FormFields>({
     fullName: '', phoneNumber: '', serviceType: '', description: '',
-    address: '', landmark: '', preferredTime: '',
+    address: '', landmark: '',
   });
   const [errors, setErrors] = useState<Partial<FormFields>>({});
 
   const [location, setLocation] = useState<LocationData>(null);
   const [locStatus, setLocStatus] = useState<LocationStatus>('idle');
   const [locError, setLocError] = useState('');
+  const watchIdRef = useRef<number | null>(null);
+  const latestLocationRef = useRef<LocationData>(null);
 
   const [images, setImages] = useState<ImageItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -141,7 +139,10 @@ export default function ServiceRequestForm() {
     customerName: string; phoneNumber: string; serviceType: string; description: string;
   } | null>(null);
 
-  useEffect(() => () => { images.forEach(img => URL.revokeObjectURL(img.preview)); }, []);
+  useEffect(() => () => {
+    images.forEach(img => URL.revokeObjectURL(img.preview));
+    if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+  }, []);
 
   // ── Handlers ──
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -151,16 +152,85 @@ export default function ServiceRequestForm() {
   };
 
   const getLocation = () => {
-    if (!navigator.geolocation) { setLocStatus('error'); setLocError('Geolocation not supported.'); return; }
-    setLocStatus('loading'); setLocError('');
-    navigator.geolocation.getCurrentPosition(
-      pos => { setLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }); setLocStatus('success'); toastSuccess('Location captured!', 'GPS coordinates added to your request.'); },
-      err => { setLocStatus('error'); setLocError(err.code === 1 ? 'Location access denied. Please allow in browser settings.' : 'Could not get location. Try again.'); toastError('Location failed', 'Please allow location access or skip this step.'); },
-      { timeout: 12000, enableHighAccuracy: true }
+    if (!navigator.geolocation) { setLocStatus('error'); setLocError('Geolocation not supported by your browser.'); return; }
+
+    // Clear any previous watcher
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+
+    setLocStatus('loading'); setLocError(''); setLocation(null);
+    latestLocationRef.current = null;
+
+    const GOOD_ACCURACY_METERS = 200; // stop watching once we're within 200 m
+    const WATCH_TIMEOUT_MS = 20000;   // give up after 20 s total
+
+    let settled = false;
+    const deadline = setTimeout(() => {
+      if (!settled && watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+        
+        const finalLoc = latestLocationRef.current;
+        if (finalLoc) {
+          setLocStatus('success');
+          toastInfo('Best location found', `Accuracy: ~${Math.round(finalLoc.accuracy)} m — consider entering address manually for precision.`);
+        } else {
+          setLocStatus('error');
+          setLocError('Could not get a reliable location. Please enter your address manually.');
+          toastError('Location timed out', 'GPS could not find you. Please type your address.');
+        }
+      }
+    }, WATCH_TIMEOUT_MS);
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        const newLoc = { latitude, longitude, accuracy };
+        latestLocationRef.current = newLoc;
+        setLocation(newLoc);
+
+        if (accuracy <= GOOD_ACCURACY_METERS && !settled) {
+          settled = true;
+          clearTimeout(deadline);
+          navigator.geolocation.clearWatch(watchIdRef.current!);
+          watchIdRef.current = null;
+          setLocStatus('success');
+          toastSuccess('Location captured!', `Accurate to ~${Math.round(accuracy)} m.`);
+        } else {
+          // Keep 'loading' while refining — UI shows live accuracy update
+          setLocStatus('loading');
+        }
+      },
+      (err) => {
+        clearTimeout(deadline);
+        if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+        setLocStatus('error');
+        setLocError(
+          err.code === 1
+            ? 'Location access denied. Please allow location in your browser settings.'
+            : 'Could not get your location. Try again or enter address manually.'
+        );
+        toastError('Location failed', 'Please allow location access or type your address.');
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,        // never use a cached position
+        timeout: WATCH_TIMEOUT_MS,
+      }
     );
   };
 
-  const clearLocation = () => { setLocation(null); setLocStatus('idle'); setLocError(''); };
+  const clearLocation = () => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    latestLocationRef.current = null;
+    setLocation(null); setLocStatus('idle'); setLocError('');
+  };
 
   const processFiles = useCallback((files: FileList | File[]) => {
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic'];
@@ -197,7 +267,6 @@ export default function ServiceRequestForm() {
     if (!form.description.trim()) e.description = 'Please describe the problem';
     else if (form.description.trim().length < 10) e.description = 'Description must be at least 10 characters';
     if (!form.address.trim()) e.address = 'Address is required';
-    if (!form.preferredTime) e.preferredTime = 'Please select a preferred visit time';
     setErrors(e);
     if (Object.keys(e).length > 0) toastError('Please fix the errors', 'Some required fields are missing or incorrect.');
     return Object.keys(e).length === 0;
@@ -212,7 +281,6 @@ export default function ServiceRequestForm() {
       fullName: form.fullName.trim(), phoneNumber: form.phoneNumber.trim(),
       serviceType: form.serviceType, description: form.description.trim(),
       address: form.address.trim(), landmark: form.landmark.trim() || 'Not provided',
-      preferredTime: form.preferredTime,
     };
 
     const refNumber = generateRefNumber();
@@ -242,26 +310,48 @@ export default function ServiceRequestForm() {
         mapsLink: mapsLink || 'Not available', imageUrls: imageUrlsText, status: 'New',
       });
 
+      // Step 3: Send email + Telegram notification simultaneously
       setStage('sending-email');
       const ejServiceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '';
       const ejTemplateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '';
       const ejPublicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || '';
-      if (ejServiceId && ejServiceId !== 'YOUR_SERVICE_ID') {
-        await emailjs.send(ejServiceId, ejTemplateId, {
-          reference_number: refNumber, customer_name: snap.fullName,
-          phone_number: `+91 ${snap.phoneNumber}`, service_type: snap.serviceType,
-          address: snap.address, landmark: snap.landmark, preferred_time: snap.preferredTime,
-          description: snap.description, latitude: lat || 'Not captured',
-          longitude: lng || 'Not captured', maps_link: mapsLink || 'Not available',
-          cloudinary_image_urls: imageUrlsText, timestamp,
-        }, ejPublicKey);
-      }
+
+      const telegramPayload = {
+        referenceNumber: refNumber,
+        customerName: snap.fullName,
+        phoneNumber: `+91 ${snap.phoneNumber}`,
+        serviceType: snap.serviceType,
+        address: snap.address,
+        landmark: snap.landmark,
+        description: snap.description,
+        latitude: lat || 'Not captured',
+        longitude: lng || 'Not captured',
+        mapsLink: mapsLink || 'Not available',
+        imageUrls: imageUrlsText,
+        timestamp,
+      };
+
+      await Promise.all([
+        // EmailJS
+        ejServiceId && ejServiceId !== 'YOUR_SERVICE_ID'
+          ? emailjs.send(ejServiceId, ejTemplateId, {
+              reference_number: refNumber, customer_name: snap.fullName,
+              phone_number: `+91 ${snap.phoneNumber}`, service_type: snap.serviceType,
+              address: snap.address, landmark: snap.landmark,
+              description: snap.description, latitude: lat || 'Not captured',
+              longitude: lng || 'Not captured', maps_link: mapsLink || 'Not available',
+              cloudinary_image_urls: imageUrlsText, timestamp,
+            }, ejPublicKey)
+          : Promise.resolve(),
+        // Telegram (errors swallowed inside the helper)
+        sendTelegramNotification(telegramPayload),
+      ]);
 
       setSuccessData({ refNumber, mapsLink, cloudinaryUrls, customerName: snap.fullName, phoneNumber: `+91 ${snap.phoneNumber}`, serviceType: snap.serviceType, description: snap.description });
       setStage('done');
       toastSuccess('Request submitted!', `Reference: ${refNumber}. We'll call you within 30 minutes.`);
 
-      setForm({ fullName: '', phoneNumber: '', serviceType: '', description: '', address: '', landmark: '', preferredTime: '' });
+      setForm({ fullName: '', phoneNumber: '', serviceType: '', description: '', address: '', landmark: '' });
       images.forEach(img => URL.revokeObjectURL(img.preview));
       setImages([]); setLocation(null); setLocStatus('idle'); setErrors({});
 
@@ -495,30 +585,7 @@ export default function ServiceRequestForm() {
               </div>
             </div>
 
-            <div>
-              <FieldLabel>⏰ Preferred Visit Time *</FieldLabel>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {TIME_SLOTS.map(slot => (
-                  <button
-                    key={slot.label}
-                    type="button"
-                    onClick={() => { setForm(p => ({ ...p, preferredTime: slot.label })); setErrors(p => ({ ...p, preferredTime: '' })); }}
-                    className="flex flex-col items-start px-3.5 py-3 rounded-2xl text-sm transition-all active:scale-95"
-                    style={{
-                      background: form.preferredTime === slot.label ? '#1565C0' : '#F8FAFF',
-                      color: form.preferredTime === slot.label ? 'white' : '#374151',
-                      border: `2px solid ${form.preferredTime === slot.label ? '#1565C0' : '#E2E8F0'}`,
-                      boxShadow: form.preferredTime === slot.label ? '0 4px 12px rgba(21,101,192,0.25)' : 'none',
-                    }}
-                  >
-                    <span className="text-base">{slot.emoji}</span>
-                    <span className="font-bold text-xs mt-1 leading-tight">{slot.label}</span>
-                    <span className="text-[10px] opacity-70 leading-tight">{slot.sub}</span>
-                  </button>
-                ))}
-              </div>
-              <FieldError msg={errors.preferredTime} />
-            </div>
+
           </SectionCard>
 
           {/* ── Section 3: Location ── */}
@@ -567,22 +634,47 @@ export default function ServiceRequestForm() {
                 <div className="text-center py-3">
                   <div className="w-8 h-8 border-[3px] border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2" />
                   <p className="text-[#1565C0] text-sm font-semibold">Getting your GPS location…</p>
+                  {location && (
+                    <p className="text-xs text-gray-400 mt-1">Refining… accuracy ~{Math.round(location.accuracy)} m</p>
+                  )}
+                  {!location && (
+                    <p className="text-xs text-gray-400 mt-1">Please wait, this may take a few seconds</p>
+                  )}
                 </div>
               )}
 
               {locStatus === 'success' && location && (
                 <div className="space-y-2">
-                  <div className="rounded-xl p-3" style={{ background: '#F0FDF4', border: '1.5px solid #86EFAC' }}>
-                    <p className="text-green-700 font-black text-sm mb-2">✅ Location Captured!</p>
-                    <p className="text-xs text-gray-600 font-mono">Lat: {location.latitude.toFixed(6)} · Lng: {location.longitude.toFixed(6)}</p>
-                    <a href={`https://maps.google.com/?q=${location.latitude},${location.longitude}`} target="_blank" rel="noopener noreferrer"
-                      className="text-xs text-blue-600 underline mt-1 inline-block font-semibold">View on Google Maps ↗</a>
+                  <div
+                    className="rounded-xl p-3"
+                    style={{
+                      background: location.accuracy <= 500 ? '#F0FDF4' : '#FFFBEB',
+                      border: `1.5px solid ${location.accuracy <= 500 ? '#86EFAC' : '#FCD34D'}`,
+                    }}
+                  >
+                    <p className={`font-black text-sm mb-1 ${location.accuracy <= 500 ? 'text-green-700' : 'text-amber-700'}`}>
+                      {location.accuracy <= 500 ? '✅ Location Captured!' : '⚠️ Low Accuracy Location'}
+                    </p>
+                    <p className="text-xs text-gray-600 font-mono">
+                      Lat: {location.latitude.toFixed(6)} · Lng: {location.longitude.toFixed(6)}
+                    </p>
+                    <p className={`text-xs font-semibold mt-1 ${location.accuracy <= 200 ? 'text-green-600' : location.accuracy <= 500 ? 'text-amber-600' : 'text-red-500'}`}>
+                      Accuracy: ~{Math.round(location.accuracy)} m
+                      {location.accuracy > 500 && ' — please type your address for precision'}
+                    </p>
+                    <a
+                      href={`https://maps.google.com/?q=${location.latitude},${location.longitude}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="text-xs text-blue-600 underline mt-1 inline-block font-semibold"
+                    >
+                      Verify on Google Maps ↗
+                    </a>
                   </div>
                   <div className="flex gap-2">
                     <button type="button" onClick={getLocation}
                       className="flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
                       style={{ background: 'white', color: '#1565C0', border: '1.5px solid #BFDBFE' }}>
-                      <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                      <RefreshCw className="w-3.5 h-3.5" /> Retry
                     </button>
                     <button type="button" onClick={clearLocation}
                       className="flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
@@ -632,12 +724,78 @@ export default function ServiceRequestForm() {
               )}
             </AnimatePresence>
 
+            {/* Mobile bottom sheet */}
+            {showMobileSheet && (
+              <div
+                className="fixed inset-0 z-50 flex items-end justify-center"
+                style={{ background: 'rgba(0,0,0,0.45)' }}
+                onClick={() => setShowMobileSheet(false)}
+              >
+                <div
+                  className="w-full max-w-lg rounded-t-3xl p-6 space-y-3"
+                  style={{ background: 'white' }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+                  <p className="text-center font-black text-gray-800 text-base mb-4">Add Photos</p>
+
+                  {/* Camera option */}
+                  <button
+                    type="button"
+                    onClick={() => { setShowMobileSheet(false); cameraInputRef.current?.click(); }}
+                    className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-left transition-all active:scale-95"
+                    style={{ background: '#EFF6FF', color: '#1565C0' }}
+                  >
+                    <span className="text-2xl">📷</span>
+                    <div>
+                      <p className="font-black text-sm">Take a Photo</p>
+                      <p className="text-xs font-normal text-blue-400">Opens your device camera</p>
+                    </div>
+                  </button>
+
+                  {/* Gallery option */}
+                  <button
+                    type="button"
+                    onClick={() => { setShowMobileSheet(false); fileInputRef.current?.click(); }}
+                    className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-left transition-all active:scale-95"
+                    style={{ background: '#F0FDF4', color: '#2D5A27' }}
+                  >
+                    <span className="text-2xl">🖼️</span>
+                    <div>
+                      <p className="font-black text-sm">Choose from Gallery</p>
+                      <p className="text-xs font-normal text-green-500">Select one or more existing photos</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowMobileSheet(false)}
+                    className="w-full py-3 rounded-2xl text-gray-400 font-semibold text-sm mt-1"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Hidden inputs */}
+            {/* Gallery input — no capture, lets user choose from gallery */}
+            <input ref={fileInputRef} type="file" accept="image/*" multiple
+              onChange={handleFileInput} className="hidden" disabled={images.length >= 5} />
+            {/* Camera input — capture=environment forces camera on mobile */}
+            <input ref={cameraInputRef} type="file" accept="image/*" capture="environment"
+              onChange={handleFileInput} className="hidden" disabled={images.length >= 5} />
+
             {/* Drop zone */}
             <div
               onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
-              onClick={() => images.length < 5 && fileInputRef.current?.click()}
+              onClick={() => {
+                if (images.length >= 5) return;
+                if (isMobile()) { setShowMobileSheet(true); }
+                else { fileInputRef.current?.click(); }
+              }}
               className="rounded-2xl p-7 text-center cursor-pointer transition-all select-none"
               style={{
                 border: `2px dashed ${isDragging ? '#1565C0' : '#CBD5E1'}`,
@@ -646,14 +804,12 @@ export default function ServiceRequestForm() {
                 cursor: images.length >= 5 ? 'not-allowed' : 'pointer',
               }}
             >
-              <input ref={fileInputRef} type="file" accept="image/*" multiple capture="environment"
-                onChange={handleFileInput} className="hidden" disabled={images.length >= 5} />
               <div className="text-4xl mb-2">{isDragging ? '📂' : '📷'}</div>
               <p className="font-bold text-gray-700 text-sm">
-                {isDragging ? 'Drop here!' : images.length >= 5 ? 'Maximum 5 images reached' : 'Tap to take photo or upload'}
+                {isDragging ? 'Drop here!' : images.length >= 5 ? 'Maximum 5 images reached' : 'Tap to take a photo or choose from gallery'}
               </p>
               <p className="text-xs text-gray-400 mt-1">Camera · Gallery · Drag &amp; Drop · 10 MB max</p>
-              <p className="text-xs text-[#1565C0] font-semibold mt-2">📱 On mobile: opens camera directly</p>
+              <p className="text-xs text-[#1565C0] font-semibold mt-2">📱 Mobile: choose camera or gallery</p>
             </div>
 
             {/* Previews */}
@@ -673,9 +829,12 @@ export default function ServiceRequestForm() {
                   </div>
                 ))}
                 {images.length < 5 && (
-                  <button type="button" onClick={() => fileInputRef.current?.click()}
+                  <button
+                    type="button"
+                    onClick={() => { if (isMobile()) { setShowMobileSheet(true); } else { fileInputRef.current?.click(); } }}
                     className="aspect-square rounded-2xl border-2 border-dashed flex items-center justify-center text-gray-400 hover:text-[#1565C0] transition-colors text-3xl"
-                    style={{ borderColor: '#CBD5E1' }}>
+                    style={{ borderColor: '#CBD5E1' }}
+                  >
                     +
                   </button>
                 )}

@@ -7,6 +7,7 @@ import Image from 'next/image';
 import emailjs from '@emailjs/browser';
 import { uploadImages } from '@/lib/cloudinary';
 import { submitToSheets } from '@/lib/sheets';
+import { sendTelegramNotification } from '@/lib/telegram';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const SERVICE_TYPES = [
@@ -57,6 +58,9 @@ function getTimestamp(): string {
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BookingForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [showMobileSheet, setShowMobileSheet] = useState(false);
+  const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -72,7 +76,9 @@ export default function BookingForm() {
   // GPS
   const [locState, setLocState] = useState<LocationState>('idle');
   const [locError, setLocError] = useState('');
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number; accuracy: number } | null>(null);
+  const watchIdRef = useRef<number | null>(null);
+  const latestLocationRef = useRef<{ lat: number; lng: number; accuracy: number } | null>(null);
 
   // Images
   const [images, setImages]     = useState<UploadedImage[]>([]);
@@ -92,8 +98,11 @@ export default function BookingForm() {
     description: string;
   } | null>(null);
 
-  // Revoke object URLs on unmount
-  useEffect(() => () => { images.forEach(img => URL.revokeObjectURL(img.preview)); }, []);
+  // Cleanup on unmount
+  useEffect(() => () => {
+    images.forEach(img => URL.revokeObjectURL(img.preview));
+    if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+  }, []);
 
   // ── Field change ──
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -109,19 +118,82 @@ export default function BookingForm() {
       setLocError('Geolocation not supported by your browser.');
       return;
     }
+
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+
     setLocState('loading');
     setLocError('');
-    navigator.geolocation.getCurrentPosition(
-      pos => { setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setLocState('success'); },
-      err => {
-        setLocState('error');
-        setLocError(err.code === 1 ? 'Location permission denied. Please allow in browser settings.' : 'Could not get location. Try again.');
+    setLocation(null);
+    latestLocationRef.current = null;
+
+    const GOOD_ACCURACY_METERS = 200;
+    const WATCH_TIMEOUT_MS = 20000;
+
+    let settled = false;
+    const deadline = setTimeout(() => {
+      if (!settled && watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+        
+        const finalLoc = latestLocationRef.current;
+        if (finalLoc) {
+          setLocState('success');
+        } else {
+          setLocState('error');
+          setLocError('Location request timed out. Please enter your address manually.');
+        }
+      }
+    }, WATCH_TIMEOUT_MS);
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        const newLoc = { lat: latitude, lng: longitude, accuracy };
+        latestLocationRef.current = newLoc;
+        setLocation(newLoc);
+
+        if (accuracy <= GOOD_ACCURACY_METERS && !settled) {
+          settled = true;
+          clearTimeout(deadline);
+          navigator.geolocation.clearWatch(watchIdRef.current!);
+          watchIdRef.current = null;
+          setLocState('success');
+        } else {
+          setLocState('loading');
+        }
       },
-      { timeout: 12000, enableHighAccuracy: true }
+      (err) => {
+        clearTimeout(deadline);
+        if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+        setLocState('error');
+        setLocError(
+          err.code === 1
+            ? 'Location permission denied. Please allow in browser settings.'
+            : 'Could not get location. Try again or enter manually.'
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: WATCH_TIMEOUT_MS,
+      }
     );
   };
 
-  const clearLocation = () => { setLocation(null); setLocState('idle'); setLocError(''); };
+  const clearLocation = () => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
+    }
+    latestLocationRef.current = null;
+    setLocation(null);
+    setLocState('idle');
+    setLocError('');
+  };
 
   // ── Image upload ──
   const processFiles = useCallback((files: FileList | File[]) => {
@@ -225,36 +297,54 @@ export default function BookingForm() {
         status: 'New',
       });
 
-      // Step 3: Send EmailJS notification
+      // Step 3: Send email + Telegram notification simultaneously
       setStage('sending-email');
       const ejServiceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || '';
       const ejTemplateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || '';
       const ejPublicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || '';
 
-      if (ejServiceId && ejServiceId !== 'YOUR_SERVICE_ID') {
-        await emailjs.send(
-          ejServiceId,
-          ejTemplateId,
-          {
-            reference_number: ref,
-            customer_name: snap.fullName,
-            phone_number: `+91 ${snap.phone}`,
-            service_type: snap.service,
-            address: snap.address,
-            landmark: snap.landmark,
-            preferred_time: snap.timeSlot,
-            description: snap.problem,
-            latitude: lat || 'Not captured',
-            longitude: lng || 'Not captured',
-            maps_link: mapsLink || 'Not available',
-            cloudinary_image_urls: imageUrlsText,
-            timestamp,
-          },
-          ejPublicKey
-        );
-      } else {
-        console.warn('[EmailJS] Credentials not configured — skipping email.');
-      }
+      const telegramPayload = {
+        referenceNumber: ref,
+        customerName: snap.fullName,
+        phoneNumber: `+91 ${snap.phone}`,
+        serviceType: snap.service,
+        address: snap.address,
+        landmark: snap.landmark,
+        description: snap.problem,
+        latitude: lat || 'Not captured',
+        longitude: lng || 'Not captured',
+        mapsLink: mapsLink || 'Not available',
+        imageUrls: imageUrlsText,
+        timestamp,
+      };
+
+      await Promise.all([
+        // EmailJS
+        ejServiceId && ejServiceId !== 'YOUR_SERVICE_ID'
+          ? emailjs.send(
+              ejServiceId,
+              ejTemplateId,
+              {
+                reference_number: ref,
+                customer_name: snap.fullName,
+                phone_number: `+91 ${snap.phone}`,
+                service_type: snap.service,
+                address: snap.address,
+                landmark: snap.landmark,
+                preferred_time: snap.timeSlot,
+                description: snap.problem,
+                latitude: lat || 'Not captured',
+                longitude: lng || 'Not captured',
+                maps_link: mapsLink || 'Not available',
+                cloudinary_image_urls: imageUrlsText,
+                timestamp,
+              },
+              ejPublicKey
+            )
+          : Promise.resolve(),
+        // Telegram (errors swallowed inside the helper)
+        sendTelegramNotification(telegramPayload),
+      ]);
 
       // Done — store snapshot in successData so success screen has all data
       setSuccessData({
@@ -543,22 +633,40 @@ export default function BookingForm() {
                 <div className="text-center py-3">
                   <div className="w-7 h-7 border-[3px] border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-2" />
                   <p className="text-blue-600 text-xs font-medium animate-pulse">Getting your GPS location...</p>
+                  {location && (
+                    <p className="text-[10px] text-gray-400 mt-1">Refining… accuracy ~{Math.round(location.accuracy)} m</p>
+                  )}
+                  {!location && (
+                    <p className="text-[10px] text-gray-400 mt-1">Please wait, this may take a few seconds</p>
+                  )}
                 </div>
               )}
 
               {locState === 'success' && location && (
                 <div className="space-y-2">
-                  <div className="bg-green-50 border border-green-200 rounded-xl p-3">
-                    <p className="text-green-700 font-bold text-xs mb-1.5">📍 Location Captured Successfully</p>
-                    <p className="font-mono text-xs text-gray-700">Latitude: <span className="font-bold text-green-700">{location.lat.toFixed(6)}</span></p>
-                    <p className="font-mono text-xs text-gray-700">Longitude: <span className="font-bold text-green-700">{location.lng.toFixed(6)}</span></p>
+                  <div
+                    className="rounded-xl p-3 border"
+                    style={{
+                      background: location.accuracy <= 500 ? '#F0FDF4' : '#FFFBEB',
+                      borderColor: location.accuracy <= 500 ? '#86EFAC' : '#FCD34D',
+                    }}
+                  >
+                    <p className={`font-bold text-xs mb-1 ${location.accuracy <= 500 ? 'text-green-700' : 'text-amber-700'}`}>
+                      {location.accuracy <= 500 ? '📍 Location Captured Successfully' : '⚠️ Low Accuracy Location'}
+                    </p>
+                    <p className="font-mono text-xs text-gray-700">Latitude: <span className="font-bold">{location.lat.toFixed(6)}</span></p>
+                    <p className="font-mono text-xs text-gray-700">Longitude: <span className="font-bold">{location.lng.toFixed(6)}</span></p>
+                    <p className={`text-[10px] font-semibold mt-1 ${location.accuracy <= 200 ? 'text-green-600' : location.accuracy <= 500 ? 'text-amber-600' : 'text-red-500'}`}>
+                      Accuracy: ~{Math.round(location.accuracy)} m
+                      {location.accuracy > 500 && ' — please type your address for precision'}
+                    </p>
                     <a href={`https://maps.google.com/?q=${location.lat},${location.lng}`} target="_blank" rel="noopener noreferrer"
-                      className="text-xs text-blue-600 underline mt-1 inline-block">View on Maps ↗</a>
+                      className="text-xs text-blue-600 underline mt-1.5 inline-block font-medium">View on Maps ↗</a>
                   </div>
                   <div className="flex gap-2">
                     <button type="button" onClick={getLocation}
                       className="flex-1 py-2 text-xs font-bold bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition flex items-center justify-center gap-1">
-                      <RefreshCw size={11} /> Refresh
+                      <RefreshCw size={11} /> Retry
                     </button>
                     <button type="button" onClick={clearLocation}
                       className="flex-1 py-2 text-xs font-bold bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition flex items-center justify-center gap-1">
@@ -589,31 +697,99 @@ export default function BookingForm() {
                 </div>
               </div>
 
+              {/* Mobile bottom sheet */}
+              {showMobileSheet && (
+                <div
+                  className="fixed inset-0 z-50 flex items-end justify-center"
+                  style={{ background: 'rgba(0,0,0,0.45)' }}
+                  onClick={() => setShowMobileSheet(false)}
+                >
+                  <div
+                    className="w-full max-w-lg rounded-t-3xl p-6 space-y-3"
+                    style={{ background: 'white' }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+                    <p className="text-center font-black text-gray-800 text-base mb-4">Add Photos</p>
+
+                    <button
+                      type="button"
+                      onClick={() => { setShowMobileSheet(false); cameraInputRef.current?.click(); }}
+                      className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-left transition-all active:scale-95"
+                      style={{ background: '#FFF7ED', color: '#C2410C' }}
+                    >
+                      <span className="text-2xl">📷</span>
+                      <div>
+                        <p className="font-black text-sm">Take a Photo</p>
+                        <p className="text-xs font-normal text-orange-400">Opens your device camera</p>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => { setShowMobileSheet(false); fileInputRef.current?.click(); }}
+                      className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold text-left transition-all active:scale-95"
+                      style={{ background: '#F0FDF4', color: '#2D5A27' }}
+                    >
+                      <span className="text-2xl">🖼️</span>
+                      <div>
+                        <p className="font-black text-sm">Choose from Gallery</p>
+                        <p className="text-xs font-normal text-green-500">Select one or more existing photos</p>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowMobileSheet(false)}
+                      className="w-full py-3 rounded-2xl text-gray-400 font-semibold text-sm mt-1"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Gallery input — no capture */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileInput}
+                className="hidden"
+                disabled={images.length >= 5}
+              />
+              {/* Camera input — forces camera on mobile */}
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileInput}
+                className="hidden"
+                disabled={images.length >= 5}
+              />
+
               {/* Drop zone */}
               <div
                 onDragOver={e => { e.preventDefault(); setIsDrag(true); }}
                 onDragLeave={() => setIsDrag(false)}
                 onDrop={handleDrop}
-                onClick={() => images.length < 5 && fileInputRef.current?.click()}
+                onClick={() => {
+                  if (images.length >= 5) return;
+                  if (isMobile()) { setShowMobileSheet(true); }
+                  else { fileInputRef.current?.click(); }
+                }}
                 className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all ${
                   isDragging ? 'border-orange-400 bg-orange-50' : 'border-gray-200 hover:border-orange-300 hover:bg-gray-50'
                 } ${images.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  capture="environment"
-                  onChange={handleFileInput}
-                  className="hidden"
-                  disabled={images.length >= 5}
-                />
                 <div className="text-3xl mb-1.5">📷</div>
                 <p className="text-sm font-semibold text-gray-600">
-                  {isDragging ? 'Drop here!' : images.length >= 5 ? 'Maximum 5 images reached' : 'Tap to take photo or upload'}
+                  {isDragging ? 'Drop here!' : images.length >= 5 ? 'Maximum 5 images reached' : 'Tap to take a photo or choose from gallery'}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">Camera · Gallery · Drag & Drop · 10MB max</p>
+                <p className="text-xs text-gray-400 mt-0.5">Camera · Gallery · Drag &amp; Drop · 10MB max</p>
+                <p className="text-xs text-orange-400 font-semibold mt-1">📱 Mobile: choose camera or gallery</p>
               </div>
 
               {/* Previews */}
@@ -632,8 +808,11 @@ export default function BookingForm() {
                     </div>
                   ))}
                   {images.length < 5 && (
-                    <button type="button" onClick={() => fileInputRef.current?.click()}
-                      className="aspect-square rounded-lg border-2 border-dashed border-gray-200 hover:border-orange-300 flex items-center justify-center text-gray-300 hover:text-orange-400 transition text-2xl">
+                    <button
+                      type="button"
+                      onClick={() => { if (isMobile()) { setShowMobileSheet(true); } else { fileInputRef.current?.click(); } }}
+                      className="aspect-square rounded-lg border-2 border-dashed border-gray-200 hover:border-orange-300 flex items-center justify-center text-gray-300 hover:text-orange-400 transition text-2xl"
+                    >
                       +
                     </button>
                   )}

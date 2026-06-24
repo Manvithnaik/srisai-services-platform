@@ -168,6 +168,24 @@
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 800;
   }
+  /* Global form control styling for high contrast & readability */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  textarea,
+  select {
+    color: #1F2937;
+    background-color: #FFFFFF;
+  }
+  /* Ensure placeholders are easily readable */
+  input::placeholder,
+  textarea::placeholder {
+    color: #9CA3AF;
+    opacity: 1;
+  }
+  /* Ensure select options have dark text */
+  select option {
+    color: #1F2937;
+    background-color: #FFFFFF;
+  }
 }
 
 /* ═══════════════════════════════════════════════════
