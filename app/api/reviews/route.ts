@@ -21,7 +21,7 @@ export async function GET() {
   }
 
   try {
-    const res = await fetch(SHEETS_URL, {
+    const res = await fetch(`${SHEETS_URL}?action=feedback`, {
       next: { revalidate: 60 },
     });
 

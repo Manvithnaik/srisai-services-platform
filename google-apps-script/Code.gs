@@ -239,6 +239,9 @@ function doPost(e) {
     // Auto-resize columns for readability
     sheet.autoResizeColumns(1, 13);
 
+    // Add status dropdown to the new row's Status cell (col M)
+    setupStatusDropdown(sheet, lastRow);
+
     // Step 2 — Send Telegram notification AFTER row is saved
     //          (failure here does NOT affect the success response)
     sendTelegramNotification(data);
@@ -254,33 +257,87 @@ function doPost(e) {
   }
 }
 
-// ── GET: return approved feedback rows as JSON ────────────────────────────────
+// ── GET: feedback list OR complaint tracking ──────────────────────────────────
 function doGet(e) {
   try {
-    var ss    = SpreadsheetApp.openById(SHEET_ID);
-    var sheet = ss.getSheetByName('Feedback');
+    var params = e && e.parameter ? e.parameter : {};
+    var action = params.action || 'feedback';
 
-    // No Feedback sheet yet — return empty array
-    if (!sheet || sheet.getLastRow() < 2) {
+    // ── Track a complaint by reference number ──
+    if (action === 'track') {
+      var ref = (params.ref || '').trim().toUpperCase();
+      if (!ref) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ success: false, error: 'No reference number provided.' }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+
+      var ss          = SpreadsheetApp.openById(SHEET_ID);
+      var sheet       = ss.getSheetByName(SHEET_NAME) || ss.getActiveSheet();
+      var lastRow     = sheet.getLastRow();
+
+      if (lastRow < 2) {
+        return ContentService
+          .createTextOutput(JSON.stringify({ success: false, error: 'No records found.' }))
+          .setMimeType(ContentService.MimeType.JSON);
+      }
+
+      // Sheet columns: A=Timestamp B=RefNum C=Name D=Phone E=Service
+      //                F=Address G=Landmark H=Description I=Lat J=Lng K=Maps L=Images M=Status
+      var data = sheet.getRange(2, 1, lastRow - 1, 13).getValues();
+      for (var i = 0; i < data.length; i++) {
+        var row    = data[i];
+        var rowRef = String(row[1]).trim().toUpperCase();
+        if (rowRef === ref) {
+          return ContentService
+            .createTextOutput(JSON.stringify({
+              success         : true,
+              referenceNumber : row[1]  || '',
+              timestamp       : row[0]  ? String(row[0]) : '',
+              customerName    : row[2]  || '',
+              phoneNumber     : row[3]  || '',
+              serviceType     : row[4]  || '',
+              address         : row[5]  || '',
+              landmark        : row[6]  || '',
+              description     : row[7]  || '',
+              latitude        : row[8]  || '',
+              longitude       : row[9]  || '',
+              mapsLink        : row[10] || '',
+              imageUrls       : row[11] || '',
+              status          : row[12] || 'New'
+            }))
+            .setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+
+      // Reference not found
+      return ContentService
+        .createTextOutput(JSON.stringify({ success: false, error: 'Reference number not found.' }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ── Default: return approved feedback for homepage carousel ──
+    var ss2    = SpreadsheetApp.openById(SHEET_ID);
+    var fSheet = ss2.getSheetByName('Feedback');
+
+    if (!fSheet || fSheet.getLastRow() < 2) {
       return ContentService
         .createTextOutput(JSON.stringify({ success: true, feedback: [] }))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
-    // Rows start at 2 (row 1 = headers)
-    var numRows = sheet.getLastRow() - 1;
-    var data    = sheet.getRange(2, 1, numRows, 6).getValues();
-
+    var numRows  = fSheet.getLastRow() - 1;
+    var fData    = fSheet.getRange(2, 1, numRows, 6).getValues();
     var feedback = [];
-    for (var i = 0; i < data.length; i++) {
-      var row = data[i];
+    for (var j = 0; j < fData.length; j++) {
+      var fr = fData[j];
       feedback.push({
-        timestamp : row[0] ? String(row[0]) : '',
-        name      : row[1] ? String(row[1]) : '',
-        email     : row[2] ? String(row[2]) : '',
-        rating    : row[3] ? parseInt(row[3]) || 5 : 5,
-        message   : row[4] ? String(row[4]) : '',
-        status    : row[5] ? String(row[5]) : 'Approved'
+        timestamp : fr[0] ? String(fr[0]) : '',
+        name      : fr[1] ? String(fr[1]) : '',
+        email     : fr[2] ? String(fr[2]) : '',
+        rating    : fr[3] ? parseInt(fr[3]) || 5 : 5,
+        message   : fr[4] ? String(fr[4]) : '',
+        status    : fr[5] ? String(fr[5]) : 'Approved'
       });
     }
 
@@ -292,6 +349,34 @@ function doGet(e) {
     return ContentService
       .createTextOutput(JSON.stringify({ success: false, error: err.toString(), feedback: [] }))
       .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Adds a dropdown validation (New / In Progress / Completed / Cancelled)
+ * to the Status cell (column M) of a given row in Sheet1.
+ * Call this every time a new service-request row is appended.
+ *
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - The target sheet.
+ * @param {number} rowIndex - 1-based row number of the newly added data row.
+ */
+function setupStatusDropdown(sheet, rowIndex) {
+  try {
+    var statusCell = sheet.getRange(rowIndex, 13); // column M
+    var rule = SpreadsheetApp.newDataValidation()
+      .requireValueInList(['New', 'In Progress', 'Completed', 'Cancelled'], true)
+      .setAllowInvalid(false)
+      .build();
+    statusCell.setDataValidation(rule);
+    // Colour-code the cell based on current value
+    var val = statusCell.getValue();
+    var bg  = val === 'Completed'   ? '#c8e6c9'
+            : val === 'In Progress' ? '#fff9c4'
+            : val === 'Cancelled'   ? '#ffcdd2'
+            :                        '#e3f2fd'; // New = light blue
+    statusCell.setBackground(bg).setFontWeight('bold');
+  } catch (err) {
+    console.error('[Dropdown] Failed to set status dropdown: ' + err.toString());
   }
 }
 
