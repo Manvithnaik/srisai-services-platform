@@ -127,7 +127,7 @@ export default function RootLayout({
           {children}
           <CursorGlow />
         </Providers>
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Analytics />
       </body>
     </html>
   )
