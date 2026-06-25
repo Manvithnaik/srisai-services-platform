@@ -59,6 +59,7 @@ function getTimestamp(): string {
 export default function BookingForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const formTopRef = useRef<HTMLDivElement>(null);
   const [showMobileSheet, setShowMobileSheet] = useState(false);
   const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -72,6 +73,8 @@ export default function BookingForm() {
     timeSlot: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [showValidationSummary, setShowValidationSummary] = useState(false);
 
   // GPS
   const [locState, setLocState] = useState<LocationState>('idle');
@@ -104,11 +107,25 @@ export default function BookingForm() {
     if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
   }, []);
 
-  // ── Field change ──
+  // ── Field change & blur ──
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(p => ({ ...p, [name]: value }));
-    setErrors(p => ({ ...p, [name]: '' }));
+    // Live-clear error once field has been touched and is now valid
+    if (touched[name]) {
+      setErrors(p => ({ ...p, [name]: '' }));
+    }
+    if (showValidationSummary) setShowValidationSummary(false);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name } = e.target;
+    setTouched(p => ({ ...p, [name]: true }));
+    // Validate individual field on blur
+    const fieldErrors = validateFields(formData);
+    if (fieldErrors[name]) {
+      setErrors(p => ({ ...p, [name]: fieldErrors[name] }));
+    }
   };
 
   // ── GPS ──
@@ -223,18 +240,50 @@ export default function BookingForm() {
     setImages(prev => { URL.revokeObjectURL(prev[i].preview); return prev.filter((_, idx) => idx !== i); });
   };
 
-  // ── Validation ──
-  const validate = () => {
+  // ── Validation helpers ──
+  const validateFields = (data: typeof formData): Record<string, string> => {
     const e: Record<string, string> = {};
-    if (!formData.fullName.trim())  e.fullName = 'Full name is required';
-    if (!formData.phone.trim())     e.phone    = 'Phone number is required';
-    else if (!/^\d{10}$/.test(formData.phone.replace(/[\s\-+()/]/g, ''))) e.phone = 'Enter a valid 10-digit mobile number';
-    if (!formData.service)          e.service  = 'Please select a service type';
-    if (!formData.problem.trim())   e.problem  = 'Please describe the problem';
-    if (!formData.address.trim())   e.address  = 'Address is required';
-    if (!formData.timeSlot)         e.timeSlot = 'Please choose a preferred time';
+    if (!data.fullName.trim())
+      e.fullName = 'Please enter your full name';
+    else if (data.fullName.trim().length < 3)
+      e.fullName = 'Name must be at least 3 characters';
+
+    if (!data.phone.trim())
+      e.phone = 'Phone number is required';
+    else if (!/^\d{10}$/.test(data.phone.replace(/[\s\-+()/]/g, '')))
+      e.phone = 'Enter a valid 10-digit mobile number (e.g. 9876543210)';
+
+    if (!data.service)
+      e.service = 'Please select the type of service you need';
+
+    if (!data.problem.trim())
+      e.problem = 'Please describe your problem so we can send the right technician';
+    else if (data.problem.trim().split(/\s+/).filter(Boolean).length < 5)
+      e.problem = 'Please describe in more detail — at least 5 words (e.g. "Power socket not working near kitchen")';
+
+    if (!data.address.trim())
+      e.address = 'Address is required so our technician knows where to come';
+    else if (data.address.trim().length < 10)
+      e.address = 'Please enter a complete address (house no., street, area)';
+
+    if (!data.timeSlot)
+      e.timeSlot = 'Please choose a preferred time slot for the visit';
+
+    return e;
+  };
+
+  const validate = () => {
+    const e = validateFields(formData);
     setErrors(e);
-    return Object.keys(e).length === 0;
+    const hasErrors = Object.keys(e).length > 0;
+    if (hasErrors) {
+      setShowValidationSummary(true);
+      // Mark all fields as touched so inline errors show
+      setTouched({ fullName: true, phone: true, service: true, problem: true, address: true, timeSlot: true });
+      // Scroll to top of form
+      setTimeout(() => formTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    }
+    return !hasErrors;
   };
 
   // ── Submit ──
@@ -498,29 +547,68 @@ export default function BookingForm() {
           {/* ─── Main Form ─── */}
           <motion.form
             onSubmit={handleSubmit}
+            ref={formTopRef as React.RefObject<HTMLFormElement>}
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             className="lg:col-span-3 bg-white rounded-2xl shadow-2xl p-6 md:p-8 space-y-5"
           >
+            {/* Validation Summary Banner */}
+            <AnimatePresence>
+              {showValidationSummary && Object.keys(errors).length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  className="bg-red-50 border-2 border-red-300 rounded-2xl p-4"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle size={18} className="text-red-500 flex-shrink-0" />
+                    <p className="font-black text-red-700 text-sm">Please fix the following before submitting:</p>
+                  </div>
+                  <ul className="space-y-1">
+                    {Object.values(errors).map((msg, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-red-600 text-xs">
+                        <span className="mt-0.5 flex-shrink-0">•</span>
+                        {msg}
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
             {/* Name + Phone */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1.5">Full Name *</label>
-                <input type="text" name="fullName" value={formData.fullName} onChange={handleChange}
+                <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} onBlur={handleBlur}
                   placeholder="Your full name"
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:border-blue-500 transition text-sm ${errors.fullName ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
+                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition text-sm ${
+                    errors.fullName ? 'border-red-400 bg-red-50 focus:border-red-500' :
+                    touched.fullName && !errors.fullName && formData.fullName ? 'border-green-400 focus:border-green-500' :
+                    'border-gray-200 focus:border-blue-500'
+                  }`}
                 />
-                {errors.fullName && <p className="text-red-500 text-xs mt-1">⚠ {errors.fullName}</p>}
+                {errors.fullName
+                  ? <p className="text-red-500 text-xs mt-1 flex items-start gap-1"><span>⚠</span> {errors.fullName}</p>
+                  : touched.fullName && formData.fullName && <p className="text-green-600 text-xs mt-1">✓ Looks good!</p>
+                }
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1.5 flex items-center gap-1"><Phone size={14} /> Phone *</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">+91</span>
-                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange}
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} onBlur={handleBlur}
                     placeholder="10-digit number" maxLength={10}
-                    className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:border-blue-500 transition text-sm ${errors.phone ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
+                    className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl focus:outline-none transition text-sm ${
+                      errors.phone ? 'border-red-400 bg-red-50 focus:border-red-500' :
+                      touched.phone && !errors.phone && formData.phone.length === 10 ? 'border-green-400 focus:border-green-500' :
+                      'border-gray-200 focus:border-blue-500'
+                    }`}
                   />
                 </div>
-                {errors.phone && <p className="text-red-500 text-xs mt-1">⚠ {errors.phone}</p>}
+                {errors.phone
+                  ? <p className="text-red-500 text-xs mt-1 flex items-start gap-1"><span>⚠</span> {errors.phone}</p>
+                  : touched.phone && formData.phone.length === 10 && <p className="text-green-600 text-xs mt-1">✓ Valid number</p>
+                }
                 <p className="text-gray-400 text-xs mt-1.5 flex items-start gap-1">
                   <span className="flex-shrink-0">🔒</span>
                   Your number is only shared with the assigned technician to contact you. Your privacy is fully protected.
@@ -532,45 +620,80 @@ export default function BookingForm() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1.5">Service Type *</label>
-                <select name="service" value={formData.service} onChange={handleChange}
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:border-blue-500 transition text-sm bg-white ${errors.service ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}>
+                <select name="service" value={formData.service} onChange={handleChange} onBlur={handleBlur}
+                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition text-sm bg-white ${
+                    errors.service ? 'border-red-400 bg-red-50 focus:border-red-500' :
+                    touched.service && formData.service ? 'border-green-400 focus:border-green-500' :
+                    'border-gray-200 focus:border-blue-500'
+                  }`}>
                   <option value="">Select service...</option>
                   {SERVICE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
-                {errors.service && <p className="text-red-500 text-xs mt-1">⚠ {errors.service}</p>}
+                {errors.service
+                  ? <p className="text-red-500 text-xs mt-1 flex items-start gap-1"><span>⚠</span> {errors.service}</p>
+                  : touched.service && formData.service && <p className="text-green-600 text-xs mt-1">✓ Service selected</p>
+                }
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1.5 flex items-center gap-1"><Clock size={14} /> Preferred Time *</label>
-                <select name="timeSlot" value={formData.timeSlot} onChange={handleChange}
-                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:border-blue-500 transition text-sm bg-white ${errors.timeSlot ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}>
+                <select name="timeSlot" value={formData.timeSlot} onChange={handleChange} onBlur={handleBlur}
+                  className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition text-sm bg-white ${
+                    errors.timeSlot ? 'border-red-400 bg-red-50 focus:border-red-500' :
+                    touched.timeSlot && formData.timeSlot ? 'border-green-400 focus:border-green-500' :
+                    'border-gray-200 focus:border-blue-500'
+                  }`}>
                   <option value="">Select time slot...</option>
                   {TIME_SLOTS.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
-                {errors.timeSlot && <p className="text-red-500 text-xs mt-1">⚠ {errors.timeSlot}</p>}
+                {errors.timeSlot
+                  ? <p className="text-red-500 text-xs mt-1 flex items-start gap-1"><span>⚠</span> {errors.timeSlot}</p>
+                  : touched.timeSlot && formData.timeSlot && <p className="text-green-600 text-xs mt-1">✓ Time selected</p>
+                }
               </div>
             </div>
 
             {/* Problem */}
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1.5">Problem Description *</label>
-              <textarea name="problem" value={formData.problem} onChange={handleChange} rows={3}
-                placeholder="Describe the issue — e.g. 'Power socket not working, sparks visible near kitchen...'"
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:border-blue-500 transition text-sm resize-none ${errors.problem ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-bold text-gray-700">Problem Description *</label>
+                <span className={`text-xs font-medium ${
+                  formData.problem.trim().split(/\s+/).filter(Boolean).length >= 5 ? 'text-green-600' : 'text-gray-400'
+                }`}>
+                  {formData.problem.trim().split(/\s+/).filter(Boolean).length} / 5 words min
+                </span>
+              </div>
+              <textarea name="problem" value={formData.problem} onChange={handleChange} onBlur={handleBlur} rows={4}
+                placeholder="Describe the issue clearly — e.g. 'Power socket not working near kitchen, sparks visible when plugging in'"
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition text-sm resize-none ${
+                  errors.problem ? 'border-red-400 bg-red-50 focus:border-red-500' :
+                  touched.problem && !errors.problem && formData.problem.trim().split(/\s+/).filter(Boolean).length >= 5 ? 'border-green-400 focus:border-green-500' :
+                  'border-gray-200 focus:border-blue-500'
+                }`}
               />
-              {errors.problem && <p className="text-red-500 text-xs mt-1">⚠ {errors.problem}</p>}
+              {errors.problem
+                ? <p className="text-red-500 text-xs mt-1 flex items-start gap-1"><span>⚠</span> {errors.problem}</p>
+                : <p className="text-gray-400 text-xs mt-1">Tip: Mention the location inside your home and when the issue started.</p>
+              }
             </div>
 
             {/* Address + Landmark */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1.5 flex items-center gap-1"><MapPin size={14} /> Address *</label>
-              <input type="text" name="address" value={formData.address} onChange={handleChange}
+              <input type="text" name="address" value={formData.address} onChange={handleChange} onBlur={handleBlur}
                 placeholder="House no., Street, Area — Shankarpura / Udupi"
-                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:border-blue-500 transition text-sm ${errors.address ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
+                className={`w-full px-4 py-3 border-2 rounded-xl focus:outline-none transition text-sm ${
+                  errors.address ? 'border-red-400 bg-red-50 focus:border-red-500' :
+                  touched.address && !errors.address && formData.address.trim().length >= 10 ? 'border-green-400 focus:border-green-500' :
+                  'border-gray-200 focus:border-blue-500'
+                }`}
               />
-              {errors.address && <p className="text-red-500 text-xs mt-1">⚠ {errors.address}</p>}
+              {errors.address
+                ? <p className="text-red-500 text-xs mt-1 flex items-start gap-1"><span>⚠</span> {errors.address}</p>
+                : <p className="text-gray-400 text-xs mt-1">Include house number, street name and area for accuracy.</p>
+              }
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1.5">Landmark <span className="font-normal text-gray-400">(optional)</span></label>
+              <label className="block text-sm font-bold text-gray-700 mb-1.5">Landmark <span className="font-normal text-gray-400">(optional — helps us find you faster)</span></label>
               <input type="text" name="landmark" value={formData.landmark} onChange={handleChange}
                 placeholder="Near temple, school, shop..."
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 transition text-sm"
