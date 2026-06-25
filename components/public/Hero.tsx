@@ -21,10 +21,10 @@ const serviceChips = [
 ];
 
 const trustBadges = [
-  { emoji: '⚡', text: 'Same-Day Service' },
+  { emoji: '⚡', text: 'Within 48 Hours' },
   { emoji: '✅', text: 'Verified Experts' },
   { emoji: '📞', text: '24/7 Support' },
-  { emoji: '🛡️', text: '90-Day Guarantee' },
+  { emoji: '🛡️', text: '30-Day Guarantee' },
 ];
 
 const stats = [
