@@ -432,7 +432,7 @@ export default function BookingForm() {
 
           <div className="flex flex-col sm:flex-row gap-3">
             <a
-              href={`https://wa.me/917337843016?text=${whatsappMessage}`}
+              href={`https://wa.me/918431759374?text=${whatsappMessage}`}
               target="_blank" rel="noopener noreferrer"
               className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition"
             >
@@ -441,8 +441,8 @@ export default function BookingForm() {
               </svg>
               Continue on WhatsApp
             </a>
-            <a href="tel:+917337843016" className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition">
-              📞 Call: +91 73378 43016
+            <a href="tel:+918431759374" className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition">
+              📞 Call: +91 84317 59374
             </a>
           </div>
           <button
@@ -484,8 +484,8 @@ export default function BookingForm() {
                 <p className="font-bold text-sm">Submission Failed</p>
                 <p className="text-sm">{submitError}</p>
                 <div className="flex gap-4 mt-1">
-                  <a href="tel:+917337843016" className="text-blue-600 font-semibold underline text-sm">📞 Call us</a>
-                  <a href="https://wa.me/917337843016" target="_blank" rel="noopener noreferrer" className="text-green-600 font-semibold underline text-sm">WhatsApp →</a>
+                  <a href="tel:+918431759374" className="text-blue-600 font-semibold underline text-sm">📞 Call us</a>
+                  <a href="https://wa.me/918431759374" target="_blank" rel="noopener noreferrer" className="text-green-600 font-semibold underline text-sm">WhatsApp →</a>
                 </div>
               </div>
             </motion.div>
@@ -825,8 +825,8 @@ export default function BookingForm() {
             {/* Contact fallback */}
             <div className="bg-white/10 border border-white/20 rounded-2xl p-4 text-white">
               <p className="font-bold text-sm text-white/90 mb-2">Prefer direct contact?</p>
-              <a href="tel:+917337843016" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition py-1">📞 +91 73378 43016</a>
-              <a href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20assistance%20with%20a%20maintenance%20issue."
+              <a href="tel:+918431759374" className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition py-1">📞 +91 84317 59374</a>
+              <a href="https://wa.me/918431759374?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20assistance%20with%20a%20maintenance%20issue."
                 target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-green-300 hover:text-green-200 transition py-1">
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">

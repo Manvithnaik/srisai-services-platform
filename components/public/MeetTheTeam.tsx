@@ -168,7 +168,7 @@ export function MeetTheTeam() {
 
                 {/* CTA */}
                 <a
-                  href={`https://wa.me/917337843016?text=Hello%20${encodeURIComponent(member.name)}%2C%20I%20need%20help%20with%20${encodeURIComponent(member.speciality)}.`}
+                  href={`https://wa.me/918431759374?text=Hello%20${encodeURIComponent(member.name)}%2C%20I%20need%20help%20with%20${encodeURIComponent(member.speciality)}.`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2.5 w-full py-3.5 rounded-2xl text-white font-bold text-sm transition-all active:scale-95 hover:opacity-90"

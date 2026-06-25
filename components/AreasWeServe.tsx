@@ -72,7 +72,7 @@ export function AreasWeServe() {
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ delay: 0.5 }} className="text-center mt-10">
           <p className="text-blue-200 text-sm mb-4">Not listed? We may still serve your area — just ask!</p>
-          <a href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20to%20check%20if%20you%20serve%20my%20area."
+          <a href="https://wa.me/918431759374?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20to%20check%20if%20you%20serve%20my%20area."
             target="_blank" rel="noopener noreferrer" className="btn-whatsapp inline-flex text-base">
             {WA_ICON} Ask on WhatsApp
           </a>

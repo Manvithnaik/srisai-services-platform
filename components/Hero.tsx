@@ -97,7 +97,7 @@ export default function Hero() {
             <motion.a
               whileHover={{ scale: 1.08, boxShadow: '0 25px 50px rgba(34, 197, 94, 0.4)' }}
               whileTap={{ scale: 0.95 }}
-              href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20assistance%20with%20a%20maintenance%20issue."
+              href="https://wa.me/918431759374?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20assistance%20with%20a%20maintenance%20issue."
               target="_blank"
               rel="noopener noreferrer"
               className="px-10 py-4 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-600 text-white rounded-full font-bold text-lg hover:shadow-2xl transition-all flex items-center justify-center gap-2.5 border border-green-400/30 backdrop-blur-sm"
@@ -167,7 +167,7 @@ export default function Hero() {
           className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full blur-xl opacity-50"
         />
         <motion.a
-          href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20assistance%20with%20a%20maintenance%20issue."
+          href="https://wa.me/918431759374?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20assistance%20with%20a%20maintenance%20issue."
           target="_blank"
           rel="noopener noreferrer"
           whileHover={{ scale: 1.15, boxShadow: '0 20px 40px rgba(34, 197, 94, 0.5)' }}

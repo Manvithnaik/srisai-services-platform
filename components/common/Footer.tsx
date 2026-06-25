@@ -46,11 +46,11 @@ export function Footer() {
               Urgent repair needed? Call or WhatsApp immediately. We respond within <strong className="text-white">15 minutes</strong>.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-sm mx-auto">
-              <a href="https://wa.me/917337843016?text=EMERGENCY%20-%20I%20need%20urgent%20repair%20help."
+              <a href="https://wa.me/918431759374?text=EMERGENCY%20-%20I%20need%20urgent%20repair%20help."
                 target="_blank" rel="noopener noreferrer" className="btn-whatsapp flex-1 justify-center text-base">
                 {WA_ICON} Emergency WhatsApp
               </a>
-              <a href="tel:+917337843016"
+              <a href="tel:+918431759374"
                 className="flex items-center justify-center gap-2 flex-1 min-h-[56px] rounded-full bg-white font-bold text-base hover:bg-orange-50 transition-colors"
                 style={{ color:'#C84B11' }}>
                 📞 Call Now
@@ -71,8 +71,8 @@ export function Footer() {
             </p>
             <div className="space-y-3">
               {[
-                { href:'tel:+917337843016', icon:Phone, text:'+91 73378 43016' },
-                { href:'mailto:manvithnaik612@gmail.com', icon:Mail, text:'manvithnaik612@gmail.com' },
+                { href:'tel:+918431759374', icon:Phone, text:'+91 84317 59374' },
+                { href:'mailto:Srideviservice.1122@gmail.com', icon:Mail, text:'Srideviservice.1122@gmail.com' },
               ].map(item => (
                 <a key={item.text} href={item.href}
                   className="flex items-center gap-3 text-gray-300 hover:text-white transition-colors group">

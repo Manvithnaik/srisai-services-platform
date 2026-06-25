@@ -119,7 +119,7 @@ export default function Footer() {
                   <Phone size={18} />
                 </motion.div>
                 <div>
-                  <p className="text-white font-bold">+91 7337843016</p>
+                  <p className="text-white font-bold">+91 84317 59374</p>
                   <p className="text-xs text-gray-400">Available 24/7</p>
                 </div>
               </li>
@@ -127,8 +127,8 @@ export default function Footer() {
                 <motion.div whileHover={{ scale: 1.2 }} className="text-blue-400 mt-0.5 flex-shrink-0 bg-blue-900/30 p-2 rounded-lg group-hover:bg-blue-800/50 transition-all">
                   <Mail size={18} />
                 </motion.div>
-                <a href="mailto:manvithnaik612@gmail.com" className="text-gray-300 hover:text-blue-400 transition-colors text-sm font-medium">
-                  manvithnaik612@gmail.com
+                <a href="mailto:Srideviservice.1122@gmail.com" className="text-gray-300 hover:text-blue-400 transition-colors text-sm font-medium">
+                  Srideviservice.1122@gmail.com
                 </a>
               </li>
               <li className="flex items-start gap-3 group">
@@ -182,7 +182,7 @@ export default function Footer() {
               transition={{ delay: 0.3 }}
               whileHover={{ scale: 1.1, boxShadow: '0 25px 50px rgba(255,255,255,0.3)' }}
               whileTap={{ scale: 0.95 }}
-              href="https://wa.me/917337843016?text=EMERGENCY%20-%20I%20need%20urgent%20help"
+              href="https://wa.me/918431759374?text=EMERGENCY%20-%20I%20need%20urgent%20help"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-10 py-5 bg-white text-red-700 font-black text-lg rounded-full hover:shadow-2xl transition-all border-2 border-white/50"

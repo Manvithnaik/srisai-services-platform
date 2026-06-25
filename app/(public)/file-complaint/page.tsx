@@ -426,7 +426,7 @@ export default function ServiceRequestForm() {
           {/* CTAs */}
           <div className="space-y-3 mb-5">
             <a
-              href={`https://wa.me/917337843016?text=${whatsappMessage}`}
+              href={`https://wa.me/918431759374?text=${whatsappMessage}`}
               target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-center gap-2.5 w-full py-4 rounded-2xl text-white font-bold text-base active:scale-95 transition-transform"
               style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)' }}
@@ -435,11 +435,11 @@ export default function ServiceRequestForm() {
               Continue on WhatsApp
             </a>
             <a
-              href="tel:+917337843016"
+              href="tel:+918431759374"
               className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-bold text-base active:scale-95 transition-transform"
               style={{ background: 'linear-gradient(135deg, #1565C0, #1E88E5)', color: 'white' }}
             >
-              📞 Call: +91 73378 43016
+              📞 Call: +91 84317 59374
             </a>
             {mapsLink && (
               <a href={mapsLink} target="_blank" rel="noopener noreferrer"
@@ -506,9 +506,9 @@ export default function ServiceRequestForm() {
                 <p className="font-black text-red-700 mb-1">Submission Failed</p>
                 <p className="text-sm text-red-600 mb-2">{submitError}</p>
                 <div className="flex gap-3">
-                  <a href="https://wa.me/917337843016" target="_blank" rel="noopener noreferrer"
+                  <a href="https://wa.me/918431759374" target="_blank" rel="noopener noreferrer"
                     className="text-green-600 font-bold underline text-sm">WhatsApp us →</a>
-                  <a href="tel:+917337843016" className="text-blue-600 font-bold underline text-sm">📞 Call</a>
+                  <a href="tel:+918431759374" className="text-blue-600 font-bold underline text-sm">📞 Call</a>
                 </div>
               </div>
             </motion.div>
@@ -867,13 +867,13 @@ export default function ServiceRequestForm() {
             <div className="rounded-2xl p-4 flex flex-col sm:flex-row gap-3" style={{ background: '#F8FAFF', border: '2px solid #E2E8F0' }}>
               <p className="text-sm font-semibold text-gray-600 sm:self-center flex-1">Prefer to contact directly?</p>
               <div className="flex gap-2">
-                <a href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20need%20help%20with%20a%20service."
+                <a href="https://wa.me/918431759374?text=Hello%20Shree%20Devi%20Services%2C%20I%20need%20help%20with%20a%20service."
                   target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-white text-sm font-bold flex-1 justify-center"
                   style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)' }}>
                   {WA_ICON} WhatsApp
                 </a>
-                <a href="tel:+917337843016"
+                <a href="tel:+918431759374"
                   className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[#1565C0] text-sm font-bold bg-blue-50 border border-blue-100 flex-1 justify-center">
                   <Phone className="w-4 h-4" /> Call
                 </a>

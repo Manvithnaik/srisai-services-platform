@@ -116,7 +116,7 @@ export function Hero() {
             <Link href="/file-complaint" className="btn-terra flex-1 text-lg justify-center">
               📋 Book a Service
             </Link>
-            <a href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20need%20help."
+            <a href="https://wa.me/918431759374?text=Hello%20Shree%20Devi%20Services%2C%20I%20need%20help."
               target="_blank" rel="noopener noreferrer"
               className="btn-whatsapp flex-1 text-lg justify-center">
               {WA_ICON} WhatsApp Now
@@ -180,10 +180,10 @@ export function Hero() {
           </motion.div>
 
           {/* Phone CTA */}
-          <motion.a href="tel:+917337843016" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
+          <motion.a href="tel:+918431759374" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
             className="flex items-center gap-2 text-white/70 hover:text-white transition-colors font-medium text-sm group w-fit">
             <Phone className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            Emergency? Call: <span className="font-black text-white">+91 73378 43016</span>
+            Emergency? Call: <span className="font-black text-white">+91 84317 59374</span>
           </motion.a>
         </div>
       </div>

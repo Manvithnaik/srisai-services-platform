@@ -107,13 +107,13 @@ export default function ServicesPage() {
           <p className="text-red-100 mb-6">Power failure, burst pipe, gas leak? Call us immediately.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
-              href="tel:+917337843016"
+              href="tel:+918431759374"
               className="px-8 py-3 bg-white text-red-600 font-black rounded-full hover:bg-red-50 transition text-lg"
             >
-              📞 +91 73378 43016
+              📞 +91 84317 59374
             </a>
             <a
-              href="https://wa.me/917337843016?text=EMERGENCY%3A%20Hello%20Shree%20Devi%20Services%2C%20I%20need%20urgent%20assistance."
+              href="https://wa.me/918431759374?text=EMERGENCY%3A%20Hello%20Shree%20Devi%20Services%2C%20I%20need%20urgent%20assistance."
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-black rounded-full transition"

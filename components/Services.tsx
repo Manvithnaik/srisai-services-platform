@@ -135,7 +135,7 @@ export default function Services() {
 
               <motion.a
                 whileHover={{ x: 6 }}
-                              href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20assistance%20with%20a%20maintenance%20issue."
+                              href="https://wa.me/918431759374?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20assistance%20with%20a%20maintenance%20issue."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold px-6 py-2.5 rounded-full hover:shadow-lg transition-all hover:to-blue-800"
@@ -174,7 +174,7 @@ export default function Services() {
             <motion.a
               whileHover={{ scale: 1.1, boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}
               whileTap={{ scale: 0.95 }}
-                            href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20assistance%20with%20a%20maintenance%20issue."
+                            href="https://wa.me/918431759374?text=Hello%20Shree%20Devi%20Services%2C%20I%20would%20like%20assistance%20with%20a%20maintenance%20issue."
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 px-10 py-4 bg-white text-blue-700 font-bold rounded-full hover:shadow-2xl transition-all border-2 border-white/30 text-lg"

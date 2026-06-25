@@ -144,7 +144,7 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-2.5 flex-shrink-0">
             <ThemeToggle />
             <a
-              href="tel:+917337843016"
+              href="tel:+918431759374"
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-semibold text-sm transition-colors
                          text-[#1A3A5C] dark:text-[#E8A040]
                          bg-[#1A3A5C]/8 dark:bg-[#E8A040]/10
@@ -152,10 +152,10 @@ export function Header() {
                          hover:bg-[#1A3A5C]/15 dark:hover:bg-[#E8A040]/20"
             >
               <Phone className="w-4 h-4" />
-              +91 73378 43016
+              +91 84317 59374
             </a>
             <a
-              href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20need%20help%20with%20a%20service."
+              href="https://wa.me/918431759374?text=Hello%20Shree%20Devi%20Services%2C%20I%20need%20help%20with%20a%20service."
               target="_blank" rel="noopener noreferrer"
               className="btn-whatsapp !min-h-0 !py-2.5 !text-sm !px-4 !rounded-xl"
             >
@@ -181,14 +181,14 @@ export function Header() {
           {/* ── Mobile Right ── */}
           <div className="flex lg:hidden items-center gap-2">
             <ThemeToggle />
-            <a href="tel:+917337843016"
+            <a href="tel:+918431759374"
               className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors
                          text-[#1A3A5C] dark:text-[#E8A040]
                          bg-[#1A3A5C]/8 dark:bg-[#E8A040]/10"
               aria-label="Call us">
               <Phone className="w-4 h-4" />
             </a>
-            <a href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services."
+            <a href="https://wa.me/918431759374?text=Hello%20Shree%20Devi%20Services."
               target="_blank" rel="noopener noreferrer"
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
               style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)' }}
@@ -286,20 +286,20 @@ export function Header() {
                 borderColor: isDark ? '#1E3250' : '#E2D9CC',
                 paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))'
               }}>
-                <a href="https://wa.me/917337843016?text=Hello%20Shree%20Devi%20Services%2C%20I%20need%20help."
+                <a href="https://wa.me/918431759374?text=Hello%20Shree%20Devi%20Services%2C%20I%20need%20help."
                   target="_blank" rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2.5 w-full py-4 rounded-2xl text-white font-bold text-base active:scale-95 transition-transform"
                   style={{ background: 'linear-gradient(135deg,#25D366,#128C7E)' }}>
                   {WA_ICON} Chat on WhatsApp
                 </a>
-                <a href="tel:+917337843016"
+                <a href="tel:+918431759374"
                   className="flex items-center justify-center gap-2.5 w-full py-4 rounded-2xl font-bold text-base active:scale-95 transition-transform border"
                   style={{
                     color: isDark ? '#E8A040' : '#1A3A5C',
                     background: isDark ? 'rgba(232,160,64,0.1)' : 'rgba(26,58,92,0.07)',
                     borderColor: isDark ? 'rgba(232,160,64,0.25)' : 'rgba(26,58,92,0.15)',
                   }}>
-                  <Phone className="w-5 h-5" /> Call: +91 73378 43016
+                  <Phone className="w-5 h-5" /> Call: +91 84317 59374
                 </a>
               </div>
             </motion.div>
