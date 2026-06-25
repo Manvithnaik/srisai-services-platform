@@ -80,7 +80,7 @@ export default function Hero() {
               variants={itemVariants}
               className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed font-medium drop-shadow-lg"
             >
-              Fast Electrical & Plumbing Support. Trusted by Udupi families. Same-day service. Emergency support 24/7.
+              Fast Electrical & Plumbing Support. Trusted by Udupi families. Service within 48 hours. Emergency support 24/7.
             </motion.p>
           </motion.div>
 

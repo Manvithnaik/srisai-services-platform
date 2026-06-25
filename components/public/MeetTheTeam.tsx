@@ -2,34 +2,43 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { Phone, Wrench, Zap } from 'lucide-react';
 
 const team = [
   {
     name: 'Mr. Saieesh Kumar',
     role: 'Co-Founder & Chief Electrical Technician',
     photo: '/founder-saieesh.jpg',
-    expertise: ['Electrical Wiring', 'Power Systems', 'Fan & Lighting'],
+    expertise: ['Electrical Wiring', 'Power Systems', 'Fan & Lighting', 'Plumbing'],
     experience: '5+ Years',
     badge: '⚡',
     badgeLabel: 'Electrical Expert',
     color: '#C84B11',
     gradient: 'linear-gradient(135deg, #C84B11, #E05A1A)',
     bio: 'Saieesh brings deep expertise in electrical systems — from household wiring and fault-finding to complete panel setups. Known for his precision and speed, he has personally handled over 2,000 electrical jobs across Udupi district.',
-    speciality: 'Electrical & Power Systems',
   },
   {
     name: 'Mr. Sampath Kumar',
     role: 'Co-Founder & Chief Service Technician',
     photo: '/founder-sampath.jpg',
-    expertise: ['Plumbing', 'Appliance Repair', 'Home Maintenance'],
+    expertise: ['Electrical Wiring', 'Power Systems', 'Fan & Lighting', 'Plumbing', 'Appliance Repair', 'Home Maintenance'],
     experience: '6+ Years',
     badge: '🔧',
     badgeLabel: 'Service Expert',
     color: '#1A3A5C',
     gradient: 'linear-gradient(135deg, #1A3A5C, #2A5080)',
-    bio: 'Sampath leads our service operations with exceptional technical knowledge in plumbing, appliance repair, and general home maintenance. His dedication to customer satisfaction has earned us thousands of 5-star reviews.',
-    speciality: 'Plumbing & Appliance Repair',
+    bio: 'Sampath leads our service operations with exceptional technical knowledge in plumbing, electrical wiring, appliance repair, and general home maintenance. His dedication to customer satisfaction has earned us thousands of 5-star reviews.',
+  },
+  {
+    name: 'Mr. Vikas',
+    role: 'Co-Founder & Senior Technician',
+    photo: '/founder-vikas.jpg',
+    expertise: ['Electrical Wiring', 'Power Systems', 'Fan & Lighting', 'Plumbing'],
+    experience: '6+ Years',
+    badge: '🛠️',
+    badgeLabel: 'Multi-Skill Expert',
+    color: '#2D5A27',
+    gradient: 'linear-gradient(135deg, #2D5A27, #4A9A40)',
+    bio: 'Vikas is a seasoned multi-skilled technician with 6 years of hands-on experience in both electrical installations and plumbing solutions. His versatility makes him the go-to expert for complex, multi-trade home repair jobs.',
   },
 ];
 
@@ -65,7 +74,7 @@ export function MeetTheTeam() {
         </motion.div>
 
         {/* Team Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {team.map((member, i) => (
             <motion.div
               key={member.name}
@@ -85,20 +94,20 @@ export function MeetTheTeam() {
               {/* Top colour bar */}
               <div className="h-1.5 w-full" style={{ background: member.gradient }} />
 
-              <div className="p-7 md:p-8">
+              <div className="p-6 md:p-7">
                 {/* Photo + Name Row */}
-                <div className="flex items-start gap-5 mb-6">
+                <div className="flex items-start gap-4 mb-5">
                   {/* Photo */}
                   <div className="relative flex-shrink-0">
                     <div
-                      className="w-28 h-28 rounded-2xl overflow-hidden shadow-xl border-4"
+                      className="w-24 h-24 rounded-2xl overflow-hidden shadow-xl border-4"
                       style={{ borderColor: `${member.color}30` }}
                     >
                       <Image
                         src={member.photo}
                         alt={`Photo of ${member.name}`}
-                        width={112}
-                        height={112}
+                        width={96}
+                        height={96}
                         className="w-full h-full object-cover object-top"
                         quality={90}
                       />
@@ -114,23 +123,23 @@ export function MeetTheTeam() {
 
                   {/* Name & Role */}
                   <div className="flex-1 min-w-0 pt-1">
-                    <h3 className="text-xl font-black text-foreground leading-tight mb-1">
+                    <h3 className="text-lg font-black text-foreground leading-tight mb-1">
                       {member.name}
                     </h3>
-                    <p className="text-sm font-semibold mb-3" style={{ color: member.color }}>
+                    <p className="text-xs font-semibold mb-3" style={{ color: member.color }}>
                       {member.role}
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {/* Experience chip */}
                       <span
-                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-white"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold text-white"
                         style={{ background: member.gradient }}
                       >
-                        🏅 {member.experience} Experience
+                        🏅 {member.experience}
                       </span>
                       {/* Speciality chip */}
                       <span
-                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold"
                         style={{ background: `${member.color}12`, color: member.color, border: `1px solid ${member.color}25` }}
                       >
                         {member.badgeLabel}
@@ -140,20 +149,20 @@ export function MeetTheTeam() {
                 </div>
 
                 {/* Bio */}
-                <p className="text-muted-foreground text-sm leading-relaxed mb-6">
+                <p className="text-muted-foreground text-sm leading-relaxed mb-5">
                   {member.bio}
                 </p>
 
                 {/* Expertise tags */}
-                <div className="mb-6">
+                <div>
                   <p className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-2.5">
                     Areas of Expertise
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5">
                     {member.expertise.map((skill) => (
                       <span
                         key={skill}
-                        className="px-3 py-1.5 rounded-xl text-xs font-bold border"
+                        className="px-2.5 py-1 rounded-xl text-xs font-bold border"
                         style={{
                           background: `${member.color}08`,
                           color: member.color,
@@ -165,20 +174,6 @@ export function MeetTheTeam() {
                     ))}
                   </div>
                 </div>
-
-                {/* CTA */}
-                <a
-                  href={`https://wa.me/918431759374?text=Hello%20${encodeURIComponent(member.name)}%2C%20I%20need%20help%20with%20${encodeURIComponent(member.speciality)}.`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2.5 w-full py-3.5 rounded-2xl text-white font-bold text-sm transition-all active:scale-95 hover:opacity-90"
-                  style={{ background: 'linear-gradient(135deg, #25D366, #128C7E)' }}
-                >
-                  <svg className="w-5 h-5 fill-current flex-shrink-0" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.272-.099-.47-.148-.67.15-.23.381-.846.954-1.035 1.154-.193.199-.378.222-.675.041-.297-.182-1.022-.378-1.852-.571-.685-.187-1.292-.46-1.801-.999-.509-.54-.809-1.234-.936-2.031-.099-.707-.001-1.259.194-1.497.196-.237.461-.592.692-.888.23-.297.323-.507.323-.846 0-.338-.108-.646-.273-.883-.165-.237-.982-.451-1.334-.451-.352 0-1.139.223-1.734.671-.595.449-.74 1.236-.888 1.884-.148.648.15 1.295.784 2.107.633.812 2.213 2.334 4.776 3.359 2.563 1.025 3.566 1.07 4.101 1.07.535 0 .848-.223 1.195-.671.347-.449.462-.898.616-1.195.154-.297.308-.447.606-.447.298 0 1.895.223 2.21.671.316.449.316 1.236.079 1.934-.237.697-.883 1.295-1.779 1.534z" />
-                  </svg>
-                  Chat with {member.name.split(' ')[1]}
-                </a>
               </div>
             </motion.div>
           ))}
@@ -198,7 +193,7 @@ export function MeetTheTeam() {
           >
             <span className="text-2xl">🤝</span>
             <span className="text-foreground">
-              Both founders personally inspect every completed job — your satisfaction is their promise.
+              All three founders personally inspect every completed job — your satisfaction is their promise.
             </span>
           </div>
         </motion.div>

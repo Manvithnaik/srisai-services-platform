@@ -206,17 +206,17 @@ export default function Footer() {
             <Clock size={24} className="text-blue-400" />
             <h4 className="font-bold text-lg">Working Hours</h4>
           </div>
-          <div className="grid md:grid-cols-2 gap-4 text-gray-300">
+          <div className="space-y-3 text-gray-300">
             <div>
-              <p className="font-semibold text-white">Monday - Friday</p>
-              <p>8:00 AM - 8:00 PM</p>
+              <p className="font-semibold text-white">Office Hours (Mon – Sun)</p>
+              <p>9:00 AM – 5:00 PM</p>
             </div>
             <div>
-              <p className="font-semibold text-white">Saturday - Sunday</p>
-              <p>9:00 AM - 6:00 PM</p>
+              <p className="font-semibold text-white">Website Bookings Response</p>
+              <p>8:00 AM – 10:00 PM</p>
             </div>
           </div>
-          <p className="text-blue-400 font-semibold mt-4">24/7 Emergency Support Available</p>
+          <p className="text-blue-400 font-semibold mt-4">📞 24/7 Phone & Emergency Support Available</p>
         </motion.div>
 
         {/* Bottom Bar */}

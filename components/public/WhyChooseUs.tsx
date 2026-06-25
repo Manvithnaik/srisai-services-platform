@@ -3,11 +3,11 @@
 import { motion } from 'framer-motion';
 
 const benefits = [
-  { emoji:'⚡', title:'Same-Day Service',      desc:'Most jobs done the same day. No long waits.', color:'#C84B11', bg:'#FFF3E0' },
+  { emoji:'⚡', title:'Within 48 Hours',        desc:'Most jobs attended within 48 hours. Fast, reliable response.', color:'#C84B11', bg:'#FFF3E0' },
   { emoji:'✅', title:'Verified Technicians',  desc:'All our experts are background-checked and trained.', color:'#1A3A5C', bg:'#EAF0F8' },
   { emoji:'💰', title:'Fair & Clear Pricing',  desc:'No hidden charges. You get a quote before work starts.', color:'#2D5A27', bg:'#E8F5E9' },
   { emoji:'📍', title:'Locally Trusted',        desc:'2000+ families in Udupi district trust us. We know your area.', color:'#C88A10', bg:'#FDF3DC' },
-  { emoji:'🛡️', title:'90-Day Guarantee',      desc:'All repairs guaranteed. Issues after? We come back free.', color:'#00696F', bg:'#E0F4F5' },
+  { emoji:'🛡️', title:'30-Day Guarantee',      desc:'All repairs guaranteed for 30 days. Issues after? We come back free.', color:'#00696F', bg:'#E0F4F5' },
   { emoji:'🌙', title:'24/7 Emergency',         desc:'Broken down at midnight? Call us. We respond fast.', color:'#6A1B9A', bg:'#F3E5F5' },
 ];
 

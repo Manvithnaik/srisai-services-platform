@@ -119,7 +119,10 @@ export function Footer() {
               <Clock className="w-4 h-4 text-[#C88A10]" /> Working Hours
             </h4>
             <ul className="space-y-3 text-sm">
-              {[{day:'Monday – Friday',hours:'8:00 AM – 8:00 PM'},{day:'Saturday – Sunday',hours:'9:00 AM – 6:00 PM'}].map(item => (
+              {[
+                {day:'Monday – Sunday', hours:'9:00 AM – 5:00 PM'},
+                {day:'Website Response', hours:'8:00 AM – 10:00 PM'}
+              ].map(item => (
                 <li key={item.day} className="pb-3 border-b last:border-0" style={{ borderColor:'rgba(255,255,255,0.08)' }}>
                   <p className="text-gray-300 font-semibold">{item.day}</p>
                   <p className="text-gray-500 text-xs mt-0.5">{item.hours}</p>
@@ -128,7 +131,7 @@ export function Footer() {
               <li>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white"
                   style={{ background:'linear-gradient(135deg,#25D366,#128C7E)' }}>
-                  🌙 24/7 Emergency Support
+                  📞 24/7 Phone & Emergency Support
                 </span>
               </li>
             </ul>

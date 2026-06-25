@@ -8,9 +8,10 @@ const areas = [
   { name:'Manipal',     icon:'🏛️', tag:'University Town' },
   { name:'Brahmavara',  icon:'🌳', tag:'Nearby Town' },
   { name:'Kaup',        icon:'🏖️', tag:'Coastal Area' },
-  { name:'Kundapura',   icon:'⚓', tag:'Port Town' },
+  { name:'Uchila',      icon:'🍁', tag:'Nearby Area' },
+  { name:'Padubidri',   icon:'🏙️', tag:'Town' },
+  { name:'Malpe',       icon:'⚓', tag:'Beach Town' },
   { name:'Karkala',     icon:'🗿', tag:'Heritage Town' },
-  { name:'Hebri',       icon:'🌿', tag:'Hill Region' },
 ];
 
 const WA_ICON = (

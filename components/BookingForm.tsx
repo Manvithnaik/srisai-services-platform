@@ -521,6 +521,10 @@ export default function BookingForm() {
                   />
                 </div>
                 {errors.phone && <p className="text-red-500 text-xs mt-1">⚠ {errors.phone}</p>}
+                <p className="text-gray-400 text-xs mt-1.5 flex items-start gap-1">
+                  <span className="flex-shrink-0">🔒</span>
+                  Your number is only shared with the assigned technician to contact you. Your privacy is fully protected.
+                </p>
               </div>
             </div>
 
