@@ -111,8 +111,10 @@ function SectionCard({ num, title, emoji, children }: { num: string; title: stri
 export default function ServiceRequestForm() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const validationBannerRef = useRef<HTMLDivElement>(null);
   const { success: toastSuccess, error: toastError, info: toastInfo } = useToast();
   const [showMobileSheet, setShowMobileSheet] = useState(false);
+  const [showValidationSummary, setShowValidationSummary] = useState(false);
 
   const isMobile = () => /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -260,16 +262,27 @@ export default function ServiceRequestForm() {
 
   const validate = (): boolean => {
     const e: Partial<FormFields> = {};
-    if (!form.fullName.trim()) e.fullName = 'Full name is required';
+    if (!form.fullName.trim()) e.fullName = 'Please enter your full name';
+    else if (form.fullName.trim().length < 3) e.fullName = 'Name must be at least 3 characters';
     if (!form.phoneNumber.trim()) e.phoneNumber = 'Phone number is required';
-    else if (!/^[6-9]\d{9}$/.test(form.phoneNumber.replace(/\s/g, ''))) e.phoneNumber = 'Enter a valid 10-digit Indian mobile number';
-    if (!form.serviceType) e.serviceType = 'Please select a service type';
-    if (!form.description.trim()) e.description = 'Please describe the problem';
-    else if (form.description.trim().length < 10) e.description = 'Description must be at least 10 characters';
-    if (!form.address.trim()) e.address = 'Address is required';
+    else if (!/^[6-9]\d{9}$/.test(form.phoneNumber.replace(/\s/g, ''))) e.phoneNumber = 'Enter a valid 10-digit Indian mobile number (starting with 6-9)';
+    if (!form.serviceType) e.serviceType = 'Please select the type of service you need';
+    if (!form.description.trim()) e.description = 'Please describe your problem so we can send the right technician';
+    else if (form.description.trim().split(/\s+/).filter(Boolean).length < 5) e.description = 'Please describe in more detail — at least 5 words (e.g. "Water pipe leaking under kitchen sink")';
+    if (!form.address.trim()) e.address = 'Address is required so our technician knows where to come';
+    else if (form.address.trim().length < 10) e.address = 'Please enter a complete address (house no., street, area)';
     setErrors(e);
-    if (Object.keys(e).length > 0) toastError('Please fix the errors', 'Some required fields are missing or incorrect.');
-    return Object.keys(e).length === 0;
+    const hasErrors = Object.keys(e).length > 0;
+    if (hasErrors) {
+      setShowValidationSummary(true);
+      // Scroll to banner after it renders
+      setTimeout(() => {
+        validationBannerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 80);
+    } else {
+      setShowValidationSummary(false);
+    }
+    return !hasErrors;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -511,6 +524,32 @@ export default function ServiceRequestForm() {
                   <a href="tel:+918431759374" className="text-blue-600 font-bold underline text-sm">📞 Call</a>
                 </div>
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showValidationSummary && Object.keys(errors).length > 0 && (
+            <motion.div
+              ref={validationBannerRef}
+              initial={{ opacity: 0, y: -8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="mb-5 rounded-2xl p-4"
+              style={{ background: '#FEF2F2', border: '2px solid #FCA5A5' }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xl flex-shrink-0">⚠️</span>
+                <p className="font-black text-red-700 text-sm">Please fix the following before submitting:</p>
+              </div>
+              <ul className="space-y-1.5">
+                {Object.values(errors).filter(Boolean).map((msg, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-red-600 text-xs font-semibold">
+                    <span className="mt-0.5 flex-shrink-0">•</span>
+                    {msg}
+                  </li>
+                ))}
+              </ul>
             </motion.div>
           )}
         </AnimatePresence>

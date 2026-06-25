@@ -280,8 +280,10 @@ export default function BookingForm() {
       setShowValidationSummary(true);
       // Mark all fields as touched so inline errors show
       setTouched({ fullName: true, phone: true, service: true, problem: true, address: true, timeSlot: true });
-      // Scroll to top of form
-      setTimeout(() => formTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+      // Wait for the banner to mount in the DOM, then scroll to it
+      setTimeout(() => {
+        formTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150);
     }
     return !hasErrors;
   };
@@ -547,7 +549,6 @@ export default function BookingForm() {
           {/* ─── Main Form ─── */}
           <motion.form
             onSubmit={handleSubmit}
-            ref={formTopRef as React.RefObject<HTMLFormElement>}
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
             className="lg:col-span-3 bg-white rounded-2xl shadow-2xl p-6 md:p-8 space-y-5"
           >
@@ -555,6 +556,7 @@ export default function BookingForm() {
             <AnimatePresence>
               {showValidationSummary && Object.keys(errors).length > 0 && (
                 <motion.div
+                  ref={formTopRef as React.RefObject<HTMLDivElement>}
                   initial={{ opacity: 0, y: -8, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.98 }}
