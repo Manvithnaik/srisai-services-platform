@@ -19,9 +19,19 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Shree Devi Services — Electrical, Plumbing & Home Maintenance in Udupi',
-  description: 'Trusted home maintenance experts in Shankarpura, Udupi, Karnataka. Quick repairs, reliable service. Same-day electrical, plumbing, and appliance support. Available 24/7.',
-  keywords: 'electrician udupi, plumber udupi, home maintenance udupi, shankarpura electrician, shree devi services',
+  metadataBase: new URL('https://shreedeviservices.in'),
+  title: 'Shree Devi Services | Electrician & Plumbing Services in Udupi',
+  description:
+    'Professional electricians, plumbers and home maintenance services in Udupi and Shankarpura. Fast, reliable and affordable home services.',
+  keywords: [
+    'electrician in udupi',
+    'plumber in udupi',
+    'electrician shankarpura',
+    'home maintenance udupi',
+    'electrical services udupi',
+    'plumbing services udupi',
+    'water tank cleaning udupi',
+  ],
   icons: {
     icon: [
       { url: '/icon-light-32x32.png', media: '(prefers-color-scheme: light)' },
@@ -30,11 +40,72 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-icon.png',
   },
+  verification: {
+    google: 'JPpL90B8pxFtliFNY23hpIoFZkdXJS2jxT5-yPhPevU',
+  },
   openGraph: {
-    title: 'Shree Devi Services — Electrical & Plumbing Experts in Udupi',
-    description: 'Fast, reliable home maintenance services in Udupi, Karnataka. Book online or WhatsApp us.',
+    title: 'Shree Devi Services',
+    description:
+      'Professional electricians and plumbers in Udupi and Shankarpura.',
+    url: 'https://shreedeviservices.in',
+    siteName: 'Shree Devi Services',
     type: 'website',
     locale: 'en_IN',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Shree Devi Services',
+    description:
+      'Professional electricians and plumbers in Udupi and Shankarpura.',
+  },
+}
+
+// ── Local Business JSON-LD Structured Data ────────────────────────────────────
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': ['Electrician', 'Plumber', 'HomeAndConstructionBusiness'],
+  name: 'Shree Devi Services',
+  url: 'https://shreedeviservices.in',
+  telephone: '+918431759374',
+  email: 'srideviservice.1122@gmail.com',
+  image: 'https://shreedeviservices.in/icon.svg',
+  priceRange: '₹₹',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Shankarpura',
+    addressLocality: 'Udupi',
+    addressRegion: 'Karnataka',
+    postalCode: '574115',
+    addressCountry: 'IN',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: '13.3409',
+    longitude: '74.7421',
+  },
+  areaServed: [
+    'Shankarpura', 'Udupi', 'Manipal', 'Brahmavara', 'Kaup',
+    'Uchila', 'Padubidri', 'Malpe', 'Karkala',
+  ],
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      opens: '09:00',
+      closes: '17:00',
+    },
+  ],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    telephone: '+918431759374',
+    contactType: 'customer service',
+    availableLanguage: ['English', 'Kannada', 'Hindi'],
+    hoursAvailable: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      opens: '00:00',
+      closes: '23:59',
+    },
   },
 }
 
@@ -45,6 +116,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        />
+      </head>
       <body className="font-sans antialiased bg-background text-foreground">
         <Providers>
           {children}
