@@ -33,12 +33,9 @@ export const metadata: Metadata = {
     'water tank cleaning udupi',
   ],
   icons: {
-    icon: [
-      { url: '/icon-light-32x32.png', media: '(prefers-color-scheme: light)' },
-      { url: '/icon-dark-32x32.png', media: '(prefers-color-scheme: dark)' },
-      { url: '/icon.svg', type: 'image/svg+xml' },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
   },
   verification: {
     google: 'JPpL90B8pxFtliFNY23hpIoFZkdXJS2jxT5-yPhPevU',
@@ -46,9 +43,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Shree Devi Services',
     description:
-      'Professional electricians and plumbers in Udupi and Shankarpura.',
+      'Professional electricians, plumbers and home maintenance services in Udupi and Shankarpura.',
     url: 'https://shreedeviservices.in',
     siteName: 'Shree Devi Services',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Shree Devi Services',
+      },
+    ],
     type: 'website',
     locale: 'en_IN',
   },
@@ -57,6 +62,7 @@ export const metadata: Metadata = {
     title: 'Shree Devi Services',
     description:
       'Professional electricians and plumbers in Udupi and Shankarpura.',
+    images: ['/og-image.png'],
   },
 }
 

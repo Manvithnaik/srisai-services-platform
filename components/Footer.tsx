@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Clock, Share2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
   const containerVariants = {
@@ -49,11 +50,22 @@ export default function Footer() {
           className="grid md:grid-cols-4 gap-12 mb-12"
         >
           {/* Brand */}
-          <motion.div variants={itemVariants}>
-            <h3 className="text-3xl font-black mb-4 flex items-center gap-2">
-              <span className="bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent">Shree Devi</span>
-              <span className="text-orange-400">Services</span>
-            </h3>
+          <motion.div variants={itemVariants} className="flex flex-col">
+            <div className="flex items-center gap-3 mb-3">
+              <Image
+                src="/logo.png"
+                alt="Shree Devi Services Logo"
+                width={50}
+                height={50}
+                className="object-contain"
+              />
+              <h3 className="text-2xl font-black text-white leading-tight">
+                Shree Devi Services
+              </h3>
+            </div>
+            <p className="text-sm font-semibold bg-gradient-to-r from-blue-400 to-orange-400 bg-clip-text text-transparent mb-4">
+              Electrical &bull; Plumbing &bull; Home Maintenance
+            </p>
             <p className="text-gray-300 mb-6 text-sm leading-relaxed font-medium">
               Trusted home maintenance experts. Quick, reliable, professional. Serving Udupi district with excellence.
             </p>

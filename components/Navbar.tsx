@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Menu, X, Zap } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,20 +20,20 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-gradient-to-r from-white via-blue-50/30 to-white/95 backdrop-blur-md supports-[backdrop-filter]:bg-white/70 border-b border-blue-100/50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center gap-2 group">
-            <motion.div
-              whileHover={{ rotate: 20, scale: 1.1 }}
-              className="text-2xl font-bold flex items-center gap-1.5"
-            >
-              <span className="bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">Shree Devi</span>
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-                className="text-orange-500"
-              >
-                <Zap className="w-6 h-6" />
-              </motion.div>
-            </motion.div>
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="flex items-center gap-2.5 md:gap-3">
+              <Image
+                src="/logo.png"
+                alt="Shree Devi Services"
+                width={50}
+                height={50}
+                priority
+                className="object-contain w-10 h-10 md:w-[50px] md:h-[50px]"
+              />
+              <span className="font-bold text-xl md:text-2xl bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
+                Shree Devi Services
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Menu */}
